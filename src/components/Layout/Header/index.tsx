@@ -1,11 +1,14 @@
 import React from "react";
 import { avatar, logo } from "../../icons";
+import { Link } from "react-router-dom";
 
 export default function Header() {
   return (
     <header className="header">
       <div className="header-logo">
-        <img src={logo} alt="" />
+        <Link to="/">
+          <img src={logo} alt="" />
+        </Link>
       </div>
       <div className="header-search">
         <i className="fa-solid fa-magnifying-glass"></i>
