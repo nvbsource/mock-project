@@ -1,5 +1,5 @@
+import { Props } from "app/interface";
 import React from "react";
-import { Props } from "../../../app/interface";
 import { Header, Sidebar } from "../index";
 export default function DefaultLayout({ children }: Props) {
   return (

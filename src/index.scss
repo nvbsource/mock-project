@@ -13,16 +13,27 @@
   margin: 0;
   padding: 0;
 }
-
+::-webkit-scrollbar {
+  width: 8px;
+  background-color: white;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #027fff;
+  border-radius: 8px;
+  background-image: -webkit-linear-gradient(90deg, #0006 25%, #0000 0, #0000 50%, #0006 0, #0006 75%, #0000 0, #0000);
+}
+::-webkit-scrollbar-track {
+  border-radius: 8px;
+}
 html,
 body {
   height: 100%;
 }
 body {
-  font-family: "Roboto", sans-serif;
   line-height: 1.5;
   color: var(--gray);
-  background-image: linear-gradient(rgba(0, 213, 255, 0.178), rgba(0, 0, 0, 0.1));
+  font-family: "Roboto", sans-serif;
+  background-color: #f3f3f3;
 }
 
 img,
@@ -84,5 +95,10 @@ input:focus {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+.form-control {
+  &:focus {
+    box-shadow: none;
   }
 }

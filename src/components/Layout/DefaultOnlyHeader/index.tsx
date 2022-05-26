@@ -13,7 +13,7 @@ export default function DefaultOnlyHeader({ children }: Props) {
           </Link>
         </div>
       </header>
-      <div className="wrapper">{children}</div>
+      <div className="authenticate">{children}</div>
     </div>
   );
 }

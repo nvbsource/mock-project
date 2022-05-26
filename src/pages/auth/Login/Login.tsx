@@ -1,6 +1,6 @@
 import { FastField, Form, Formik } from "formik";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import InputField from "../../../components/Layout/Form/InputField";
 import * as Yup from "yup";
 import IconLoading from "../../../components/Layout/Loading/IconLoading";
@@ -14,13 +14,15 @@ const LoginSchema = Yup.object({
 });
 export default function LoginForm() {
   const initialValues: MyFormValues = { email: "", password: "" };
+  const navigate = useNavigate();
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={LoginSchema}
       onSubmit={(values, { setSubmitting }) => {
         setTimeout(() => {
-          alert(JSON.stringify(values, null, 2));
+          localStorage.setItem("access_token", "fake-token");
+          navigate("/");
           setSubmitting(false);
         }, 3000);
       }}
