@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import InputField from "../../../components/Layout/Form/InputField";
+import InputField from "../../../Layout/Form/InputField";
 import * as Yup from "yup";
 import { FastField, Formik } from "formik";
 import { Form } from "react-bootstrap";
-import IconLoading from "../../../components/Layout/Loading/IconLoading";
+import IconLoading from "../../../Layout/Loading/IconLoading";
 interface MyFormValues {
   email: string;
   username: string;

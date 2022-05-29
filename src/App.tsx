@@ -1,53 +1,76 @@
-import React, { Fragment } from "react";
+import { ForgotPassword, Login, Register } from "pages/auth";
+import FavoriteArticles from "pages/FavoriteArticles";
+import Home from "pages/Home";
+import Profile from "pages/Profile";
+import Setting from "pages/Setting";
+import React from "react";
 import { Route, Routes } from "react-router-dom";
-import { DefaultLayout } from "./components/Layout";
-import PrivateRoutes from "./components/Layout/PrivateRoutes/index";
-import { privateRoutes, publicRoutes } from "./router";
+import { DefaultLayout, DefaultOnlyHeader, PrivateRoutes } from "./Layout";
 function App() {
   return (
     <Routes>
-      {publicRoutes.map((item, index) => {
-        let Layout: React.ComponentState = DefaultLayout;
-        if (item.layout) {
-          Layout = item.layout;
-        } else if (item.layout === null) {
-          Layout = Fragment;
+      <Route
+        path="/"
+        element={
+          <DefaultLayout>
+            <Home />
+          </DefaultLayout>
         }
-        const Page = item.component;
-        return (
-          <Route
-            key={index}
-            path={item.path}
-            element={
-              <Layout>
-                <Page />
-              </Layout>
-            }
-          />
-        );
-      })}
-      {privateRoutes.map((item, index) => {
-        let Layout: React.ComponentState = DefaultLayout;
-        if (item.layout) {
-          Layout = item.layout;
-        } else if (item.layout === null) {
-          Layout = Fragment;
+      />
+      <Route
+        path="/login"
+        element={
+          <DefaultOnlyHeader>
+            <Login />
+          </DefaultOnlyHeader>
         }
-        const Page = item.component;
-        return (
-          <Route
-            key={index}
-            path={item.path}
-            element={
-              <PrivateRoutes>
-                <Layout>
-                  <Page />
-                </Layout>
-              </PrivateRoutes>
-            }
-          />
-        );
-      })}
+      />
+      <Route
+        path="/register"
+        element={
+          <DefaultOnlyHeader>
+            <Register />
+          </DefaultOnlyHeader>
+        }
+      />
+      <Route
+        path="/forgot-password"
+        element={
+          <DefaultOnlyHeader>
+            <ForgotPassword />
+          </DefaultOnlyHeader>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoutes>
+            <DefaultLayout>
+              <Profile />
+            </DefaultLayout>
+          </PrivateRoutes>
+        }
+      />
+      <Route
+        path="/setting"
+        element={
+          <PrivateRoutes>
+            <DefaultLayout>
+              <Setting />
+            </DefaultLayout>
+          </PrivateRoutes>
+        }
+      />
+      <Route
+        path="/favorite-articles"
+        element={
+          <PrivateRoutes>
+            <DefaultLayout>
+              <FavoriteArticles />
+            </DefaultLayout>
+          </PrivateRoutes>
+        }
+      />
     </Routes>
   );
 }

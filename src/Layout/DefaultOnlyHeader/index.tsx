@@ -1,6 +1,6 @@
 import React from "react";
-import { Props } from "../../../app/interface";
-import { logo } from "../../icons/";
+import { Props } from "../../app/interface";
+import { logo } from "../../components/icons";
 import { Link } from "react-router-dom";
 
 export default function DefaultOnlyHeader({ children }: Props) {

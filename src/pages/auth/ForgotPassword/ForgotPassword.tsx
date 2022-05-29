@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import InputField from "../../../components/Layout/Form/InputField";
+import InputField from "../../../Layout/Form/InputField";
 import { FastField, Form, Formik } from "formik";
 import * as Yup from "yup";
-import IconLoading from "../../../components/Layout/Loading/IconLoading";
+import IconLoading from "../../../Layout/Loading/IconLoading";
 interface MyFormValues {
   email: string;
 }

@@ -1,9 +1,12 @@
+import { login, selectLogging } from "features/auth/authSlice";
 import { FastField, Form, Formik } from "formik";
+import InputField from "Layout/Form/InputField";
+import IconLoading from "Layout/Loading/IconLoading";
 import React from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-import InputField from "../../../components/Layout/Form/InputField";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import * as Yup from "yup";
-import IconLoading from "../../../components/Layout/Loading/IconLoading";
+import { useAppDispatch } from "../../../app/hooks";
 interface MyFormValues {
   email: string;
   password: string;
@@ -14,20 +17,17 @@ const LoginSchema = Yup.object({
 });
 export default function LoginForm() {
   const initialValues: MyFormValues = { email: "", password: "" };
-  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const logging = useSelector(selectLogging);
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={LoginSchema}
-      onSubmit={(values, { setSubmitting }) => {
-        setTimeout(() => {
-          localStorage.setItem("access_token", "fake-token");
-          navigate("/");
-          setSubmitting(false);
-        }, 3000);
+      onSubmit={(values) => {
+        dispatch(login({ email: values.email, password: values.password }));
       }}
     >
-      {({ handleSubmit, isSubmitting, errors }) => (
+      {({ handleSubmit }) => (
         <Form onSubmit={handleSubmit} className="needs-validation">
           <FastField
             name="email"
@@ -50,8 +50,8 @@ export default function LoginForm() {
             </div>
             <Link to="/forgot-password">Forgot password</Link>
           </div>
-          <button className="form-button" disabled={isSubmitting}>
-            Sign in {isSubmitting && <IconLoading />}
+          <button className="form-button" disabled={logging}>
+            Sign in {logging && <IconLoading />}
           </button>
           <div className="form-register">
             <p>You haven't any account?</p>

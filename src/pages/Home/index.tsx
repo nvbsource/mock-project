@@ -1,135 +1,46 @@
-import { avatar } from "components/icons";
-import React from "react";
+import { Article } from "Layout";
+import React, { useEffect, useState } from "react";
+import { Form } from "react-bootstrap";
+import ArticlesFeed from "../Article/pages/ArticlesFeed";
+import { useAppSelector } from "app/hooks";
+import { useAppDispatch } from "../../app/hooks";
+import { selectLoading } from "features/article/articleSlice";
+import { getListArticles } from "features/article/articleSlice";
+import { selectListArticles } from "../../features/article/articleSlice";
 
 export default function Home() {
+  const loading = useAppSelector(selectLoading);
+  const listArticles = useAppSelector(selectListArticles);
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(getListArticles());
+  }, []);
   return (
-    <main className="articles">
-      <div className="articles-body">
-        <div className="articles-item">
-          <div className="articles-author">
-            <img src={avatar} alt="" className="articles-avatar" />
-            <div className="articles-online">
-              <h6 className="articles-name">Prothinidi Thomas</h6>
-              <span className="articles-time"> New feed November 24, 2021</span>
-            </div>
-          </div>
-          <div className="articles-content">
-            <h5 className="articles-title">Create a new implementation</h5>
-            <p className="articles-descript">
-              If you think adventure is dangerous, try routine, it’s lethal Paulo Coelho! Good morning all friends.
-            </p>
-            <div className="articles-bottom">
-              <div className="tags">
-                <span className="tags-item">implements</span>
-                <span className="tags-item">reactjs</span>
-              </div>
-              <div className="articles-favorite">
-                <h6>2,162,350 likes</h6>
-                <button className="articles-heart active">
-                  <i className="fa-solid fa-heart"></i>
-                </button>
-              </div>
+    <>
+      <main className="feed">
+        <div className="feed-body">
+          <ArticlesFeed loading={loading} data={listArticles} />
+        </div>
+        <div className="tags">
+          <header className="tags-header">
+            <span>Tags</span>
+            <i className="fa-solid fa-ellipsis"></i>
+          </header>
+          <div className="tags-body">
+            <Form className="mb-3">
+              <Form.Control type="text" placeholder="enter your search tags..." />
+            </Form>
+            <div className="tags-content">
+              <span className="tags-item">implements</span>
+              <span className="tags-item">react</span>
+              <span className="tags-item">angular</span>
+              <span className="tags-item">global</span>
+              <span className="tags-item">discovery</span>
+              <span className="tags-item">games</span>
             </div>
           </div>
         </div>
-        <div className="articles-item">
-          <div className="articles-author">
-            <img src={avatar} alt="" className="articles-avatar" />
-            <div className="articles-online">
-              <h6 className="articles-name">Prothinidi Thomas</h6>
-              <span className="articles-time"> New feed November 24, 2021</span>
-            </div>
-          </div>
-          <div className="articles-content">
-            <h5 className="articles-title">Create a new implementation</h5>
-            <p className="articles-descript">
-              If you think adventure is dangerous, try routine, it’s lethal Paulo Coelho! Good morning all friends.
-            </p>
-            <div className="articles-bottom">
-              <div className="articles__tags">
-                <span className="articles__tags--item">implements</span>
-                <span className="articles__tags--item">reactjs</span>
-              </div>
-              <div className="articles-favorite">
-                <h6>2,162,350 likes</h6>
-                <button className="articles-heart active">
-                  <i className="fa-solid fa-heart"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="articles-item">
-          <div className="articles-author">
-            <img src={avatar} alt="" className="articles-avatar" />
-            <div className="articles-online">
-              <h6 className="articles-name">Prothinidi Thomas</h6>
-              <span className="articles-time"> New feed November 24, 2021</span>
-            </div>
-          </div>
-          <div className="articles-content">
-            <h5 className="articles-title">Create a new implementation</h5>
-            <p className="articles-descript">
-              If you think adventure is dangerous, try routine, it’s lethal Paulo Coelho! Good morning all friends.
-            </p>
-            <div className="articles-bottom">
-              <div className="articles__tags">
-                <span className="articles__tags--item">implements</span>
-                <span className="articles__tags--item">reactjs</span>
-              </div>
-              <div className="articles-favorite">
-                <h6>2,162,350 likes</h6>
-                <button className="articles-heart active">
-                  <i className="fa-solid fa-heart"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="articles-item">
-          <div className="articles-author">
-            <img src={avatar} alt="" className="articles-avatar" />
-            <div className="articles-online">
-              <h6 className="articles-name">Prothinidi Thomas</h6>
-              <span className="articles-time"> New feed November 24, 2021</span>
-            </div>
-          </div>
-          <div className="articles-content">
-            <h5 className="articles-title">Create a new implementation</h5>
-            <p className="articles-descript">
-              If you think adventure is dangerous, try routine, it’s lethal Paulo Coelho! Good morning all friends.
-            </p>
-            <div className="articles-bottom">
-              <div className="articles__tags">
-                <span className="articles__tags--item">implements</span>
-                <span className="articles__tags--item">reactjs</span>
-              </div>
-              <div className="articles-favorite">
-                <h6>2,162,350 likes</h6>
-                <button className="articles-heart active">
-                  <i className="fa-solid fa-heart"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="articles-right">
-        <header className="articles-header">
-          <span>Tags</span>
-          <i className="fa-solid fa-ellipsis"></i>
-        </header>
-        <div className="articles__tags--content">
-          <div className="tags">
-            <span className="tags-item">implements</span>
-            <span className="tags-item">react</span>
-            <span className="tags-item">angular</span>
-            <span className="tags-item">global</span>
-            <span className="tags-item">discovery</span>
-            <span className="tags-item">games</span>
-          </div>
-        </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

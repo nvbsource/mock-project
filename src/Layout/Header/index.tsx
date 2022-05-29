@@ -1,5 +1,5 @@
 import React from "react";
-import { avatar, logo } from "../../icons";
+import { avatar, logo } from "../../components/icons";
 import { Link } from "react-router-dom";
 
 export default function Header() {

@@ -1,10 +1,9 @@
 import { Register, Login, ForgotPassword } from "../pages/auth";
-import { DefaultOnlyHeader } from "../components/Layout";
+import { DefaultOnlyHeader } from "../Layout";
 import Profile from "../pages/Profile";
 import Home from "../pages/Home";
 import Setting from "../pages/Setting";
 import FavoriteArticles from "../pages/FavoriteArticles";
-import Logout from "../pages/auth/Logout";
 interface RouteState {
   path: string;
   component: React.ComponentState;
@@ -43,11 +42,6 @@ const privateRoutes: RouteState[] = [
   {
     path: "/favorite-articles",
     component: FavoriteArticles,
-  },
-  {
-    path: "/logout",
-    component: Logout,
-    layout: null,
   },
 ];
 export { publicRoutes, privateRoutes };
