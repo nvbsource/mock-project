@@ -1,8 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap");
 :root {
   --gray: #4e5d78;
   --gray-border: rgba(78, 93, 120, 0.4);
-  --bg-primary: #027fff;
+  --bg-gray: #fafafa;
+  --bg-white: #fff;
+  --bg-primary: #0281ff;
 }
 *,
 *::before,
@@ -31,9 +32,9 @@ body {
 }
 body {
   line-height: 1.5;
-  color: var(--gray);
-  font-family: "Roboto", sans-serif;
-  background-color: #f3f3f3;
+  color: var(--white-color);
+  background-color: var(--bg-gray);
+  overflow-y: overlay;
 }
 
 img,
@@ -97,8 +98,17 @@ input:focus {
     transform: rotate(360deg);
   }
 }
+
 .form-control {
   &:focus {
     box-shadow: none;
   }
+}
+.resize-none {
+  resize: none;
+}
+.spinner-big {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
 }

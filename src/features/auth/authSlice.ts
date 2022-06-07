@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "app/store";
-import { InformationUser, UserLogin } from "../../models/user.model";
+import { UserLogin, UserRegister } from "../../models/user.model";
 export interface UserState {
-  logging?: boolean;
-  currentUser?: InformationUser;
+  registerLoading: boolean;
+  logging: boolean;
 }
 const initialState: UserState = {
+  registerLoading: false,
   logging: false,
-  currentUser: undefined,
 };
 export const userSlice = createSlice({
   name: "auth",
@@ -16,19 +16,22 @@ export const userSlice = createSlice({
     login: (state, action: PayloadAction<UserLogin>) => {
       state.logging = true;
     },
-    loginSuccess: (state, action: PayloadAction<InformationUser>) => {
-      state.logging = false;
-      state.currentUser = action.payload;
-    },
-    loginFailed: (state, action: PayloadAction<string>) => {
+    loginSuccess: (state) => {
       state.logging = false;
     },
-    logout(state) {
-      localStorage.clearItem("access_token");
-      state.currentUser = undefined;
+    loginFailed: (state) => {
+      state.logging = false;
+    },
+    logout(state) {},
+    register(state, action: PayloadAction<UserRegister>) {
+      state.registerLoading = true;
+    },
+    registerSuccess(state) {
+      state.registerLoading = false;
     },
   },
 });
-export const { login, loginSuccess, loginFailed, logout } = userSlice.actions;
+export const { login, loginSuccess, loginFailed, logout, register, registerSuccess } = userSlice.actions;
 export const selectLogging = (state: RootState) => state.user.logging;
+export const selectRegisterLoading = (state: RootState) => state.user.registerLoading;
 export default userSlice.reducer;

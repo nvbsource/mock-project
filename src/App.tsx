@@ -1,11 +1,12 @@
 import { ForgotPassword, Login, Register } from "pages/auth";
-import FavoriteArticles from "pages/FavoriteArticles";
+import FavoriteArticles from "pages/Favorite";
 import Home from "pages/Home";
 import Profile from "pages/Profile";
 import Setting from "pages/Setting";
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { DefaultLayout, DefaultOnlyHeader, PrivateRoutes } from "./Layout";
+import DetailArticle from "./pages/Article/pages/DetailArticle";
 function App() {
   return (
     <Routes>
@@ -42,7 +43,7 @@ function App() {
         }
       />
       <Route
-        path="/profile"
+        path="/profile/:slug"
         element={
           <PrivateRoutes>
             <DefaultLayout>
@@ -71,6 +72,17 @@ function App() {
           </PrivateRoutes>
         }
       />
+      <Route
+        path="/article/:slug"
+        element={
+          <PrivateRoutes>
+            <DefaultLayout>
+              <DetailArticle />
+            </DefaultLayout>
+          </PrivateRoutes>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }

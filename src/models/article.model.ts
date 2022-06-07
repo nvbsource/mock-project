@@ -6,14 +6,38 @@ export interface ArticleParameter {
   limit?: number;
   offset?: number;
 }
-export interface ArticleDetail {
+export interface Comment {
+  id: number;
+  author: InformationUser;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface CommentUpload {
+  slug: string;
+  body: string;
+}
+export interface IArticle {
+  slug: string;
   title: string;
   description: string;
-  body: string;
   tagList: string[];
+  body: string;
   author: InformationUser;
   favorited: boolean;
   favoritesCount: number;
-  slug: string;
-  createdAt: string;
+  comments?: Comment[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+export interface ArticleCreate {
+  title: string;
+  description: string;
+  tagList: string[];
+  body?: string;
+}
+export interface ArticleModal {
+  title: string;
+  description: string;
+  tagList: string[];
 }

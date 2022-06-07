@@ -1,11 +1,12 @@
 //Wrapper
 .wrapper {
   display: block;
-  background-color: white;
+  background-color: var(--bg-white);
   border-radius: 10px;
   width: 100%;
   height: calc(100vh - 118px);
   padding: 18px;
+  border: 1px solid #dbdbdb;
 }
 //Header
 .header {
@@ -16,25 +17,44 @@
   display: flex;
   align-items: center;
   padding: 18px 20px;
-  background-color: white;
+  background-color: var(--bg-white);
   z-index: 999;
+  border-bottom: 1px solid #dbdbdb;
   &-logo {
     margin-right: 110px;
+  }
+  &-thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
   }
   &-search {
     width: 100%;
     max-width: 542px;
     height: 42px;
-    border: 1px solid var(--gray-border);
     border-radius: 10px;
     display: flex;
     align-items: center;
     padding: 13px 20px;
     gap: 10px;
+    background-color: #efeeef;
+    i {
+      color: #8e8e8e;
+    }
+    input {
+      background-color: transparent;
+      &::placeholder {
+        color: #8e8e8e;
+      }
+    }
   }
   &-control {
     width: 100%;
     border: none;
+    &::placeholder {
+      color: var(--white-color);
+    }
   }
   &-author {
     margin-left: auto;
@@ -46,9 +66,10 @@
 //Form
 .form {
   max-width: 580px;
-  margin: 108px auto 0;
+  margin: 0 auto;
+  padding-top: 108px;
   &-body {
-    background-color: white;
+    background-color: var(--bg-white);
     padding: 60px 20px;
     box-shadow: 0 0 15px 1px rgba(62, 62, 62, 0.1);
     border-radius: 10px;
@@ -140,7 +161,6 @@
   flex-direction: column;
   justify-content: flex-start;
   padding: 20px;
-  background-color: white;
   min-height: 100vh;
   position: fixed;
   top: 78px;
@@ -165,6 +185,7 @@
     text-decoration: none;
     color: inherit;
     min-width: 200px;
+    cursor: pointer;
     &:not(:last-child) {
       margin-bottom: 10px;
     }
@@ -181,7 +202,6 @@
 .setting {
   display: flex;
   height: 100%;
-  background-color: white;
   border-radius: 10px;
   &-menu {
     padding: 18px 20px;
@@ -229,7 +249,6 @@
   width: 100%;
   &-body {
     width: calc(100% - 270px);
-    overflow-y: auto;
   }
 }
 // Tag
@@ -240,12 +259,67 @@
   right: 20px;
   overflow: hidden;
   border-radius: 10px;
+  border: 1px solid #dbdbdb;
   .form-control {
     border: none;
     border-radius: 0;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid #c8a3a3;
     padding: 5px 0;
     font-size: 14px;
+    background-color: transparent;
+    color: var(--white-color);
+    caret-color: #e38c9e;
+    &::placeholder {
+      color: var(--white-color);
+    }
+  }
+  &-search {
+    position: relative;
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      border-radius: inherit;
+      opacity: 0;
+      transition: all 0.5s;
+    }
+    &:hover {
+      .tags-close {
+        opacity: 1;
+        visibility: visible;
+      }
+      &::before {
+        opacity: 1;
+      }
+    }
+  }
+  &-close {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transition: all 0.5s;
+    font-size: 20px;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    visibility: hidden;
+    cursor: pointer;
+  }
+  &-input {
+    border: 1px solid #dbdbdb;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    border-radius: 10px;
+    padding: 15px;
+  }
+  &-control {
+    border: none;
+    flex: 1;
   }
   &-item {
     background-color: var(--gray);
@@ -254,6 +328,7 @@
     border-radius: 20px;
     font-size: 14px;
     cursor: pointer;
+    user-select: none;
   }
   &-header {
     border-bottom: 1px solid var(--gray);
@@ -269,29 +344,75 @@
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    width: 100%;
   }
   &-body {
-    background-color: white;
+    background-color: var(--bg-white);
     padding: 18px;
   }
 }
 // Article
 .article {
-  background-color: white;
+  position: relative;
+  background-color: var(--bg-white);
   padding: 20px;
   border-radius: 10px;
+  transition: transform 0.5s;
+  border: 1px solid #dbdbdb;
+  cursor: pointer;
+  &:hover {
+    transform: scale(1.02);
+  }
   &:not(:last-child) {
     margin-bottom: 20px;
   }
-  &.loading {
-    background-color: rgb(232, 232, 232);
+  &-add {
+    margin-bottom: 20px;
+  }
+  &-action {
+    position: absolute;
+    right: 18px;
+    top: 10px;
+    font-size: 22px;
+    i {
+      transition: all 0.5s;
+      margin: 0 5px;
+      &:hover {
+        transform: scale(1.3);
+      }
+    }
+  }
+  &-notfound {
+    text-align: center;
+    font-size: 1.5rem;
+    padding: 10px;
+    border: 1px solid #dbdbdb;
+    background: white;
+    border-radius: 10px;
+    color: var(--gray);
+  }
+  &-what {
+    display: block;
+    width: 100%;
+    background-color: white;
+    border-radius: 20px;
+    border: 1px solid #dbdbdb;
+    height: 45px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    transition: all 0.5s;
+    cursor: pointer;
+    &:hover {
+      background-color: #eee;
+    }
   }
   &-avatar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(0, 85, 237, 0.4);
+    border: 2px solid rgb(255, 203, 113);
     padding: 3px;
   }
   &-author {
@@ -302,9 +423,19 @@
   }
   &-name {
     margin-bottom: 0;
+    a {
+      color: inherit;
+      text-decoration: none;
+      &:hover {
+        color: #548aff;
+      }
+    }
   }
   &-time {
     font-size: 14px;
+    &:hover {
+      text-decoration: underline;
+    }
   }
   &-heart {
     font-size: 28px;
@@ -320,13 +451,154 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    i {
+      transition: all 0.5s;
+      &:hover {
+        transform: scale(1.2);
+      }
+    }
     h6 {
       margin-bottom: 0;
+      white-space: nowrap;
     }
   }
   &-bottom {
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+}
+.profile {
+  &-information {
+    display: flex;
+    align-items: center;
+    gap: 100px;
+    padding: 20px 0 30px;
+  }
+  &-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #dbdbdb;
+  }
+  &-action {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    span {
+      font-size: 25px;
+    }
+  }
+  &-edit {
+    display: block;
+    border-radius: 4px;
+    padding: 5px 9px;
+    font-size: 14px;
+    border: 1px solid #dbdbdb;
+    text-decoration: none;
+    color: inherit;
+    &:hover {
+      color: inherit;
+    }
+  }
+  &-couter {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+  }
+  &-menu {
+    border-top: 2px solid #dbdbdb;
+    display: flex;
+    list-style: none;
+    gap: 50px;
+    padding: 0;
+    li {
+      height: 60px;
+      line-height: 60px;
+      text-align: center;
+      position: relative;
+      color: #929193;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      &.active {
+        color: black;
+        font-weight: 500;
+        &::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background-color: black;
+          transform: translateY(-100%);
+        }
+      }
+    }
+  }
+}
+.home {
+  &-menu {
+    max-width: 1122px;
+  }
+}
+.comments {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  &-write {
+    display: flex;
+  }
+  &-input {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid #dbdbdb;
+    border-radius: 10px;
+    padding: 10px 18px;
+  }
+  &-item {
+    position: relative;
+    border: 1px solid #dbdbdb;
+    background-color: white;
+    border-radius: 10px;
+  }
+  &-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dbdbdb;
+    padding: 18px;
+  }
+  &-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  &-name {
+    margin-bottom: 0;
+    font-size: 18px;
+  }
+  &-content {
+    margin-bottom: 0;
+    padding: 18px;
+  }
+  &-delete {
+    position: absolute;
+    right: 18px;
+    top: 18px;
+    font-size: 20px;
+    transition: all 0.5s;
+    cursor: pointer;
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+  &-date {
+    font-size: 14px;
   }
 }

@@ -4,4 +4,6 @@ export { default as PrivateRoutes } from "./PrivateRoutes";
 export { default as Header } from "./Header";
 export { default as Sidebar } from "./Sidebar";
 export { default as Article } from "./Article";
+export { default as ArticleLoading } from "./Article/ArticleLoading";
 export { default as IconLoading } from "./Loading/IconLoading";
+export { default as Tags } from "./Tags";

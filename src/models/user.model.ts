@@ -2,10 +2,14 @@ export interface UserLogin {
   email: string;
   password: string;
 }
-export interface UserRegister extends UserLogin {
+export interface UserRegister {
   username: string;
+  password: string;
+  email: string;
 }
-export interface InformationUser extends UserRegister {
+export interface InformationUser {
+  username: string;
   bio: string;
   image: string;
+  following?: boolean;
 }

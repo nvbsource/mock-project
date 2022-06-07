@@ -1,6 +1,9 @@
 import axios from "axios";
 
-const getAccessToken = () => localStorage.getItem("access_token");
+const getAccessToken = () => {
+  const result = localStorage.getItem("access_token");
+  return result ? JSON.parse(result).token : "";
+};
 
 const instance = axios.create({
   baseURL: "https://api.realworld.io/api",

@@ -5,6 +5,10 @@ import * as Yup from "yup";
 import { FastField, Formik } from "formik";
 import { Form } from "react-bootstrap";
 import IconLoading from "../../../Layout/Loading/IconLoading";
+import { useAppDispatch } from "../../../app/hooks";
+import { register } from "features/auth/authSlice";
+import { useAppSelector } from "app/hooks";
+import { selectRegisterLoading } from "../../../features/auth/authSlice";
 interface MyFormValues {
   email: string;
   username: string;
@@ -12,8 +16,8 @@ interface MyFormValues {
   confirmPassword: string;
 }
 const LoginSchema = Yup.object({
+  username: Yup.string().required("Username can not blank!"),
   email: Yup.string().required("Email address can not blank!").email("Email invalid!"),
-  username: Yup.string().required("Password can not blank!"),
   password: Yup.string().required("Password can not blank!"),
   confirmPassword: Yup.string()
     .required("Password can not blank!")
@@ -21,19 +25,18 @@ const LoginSchema = Yup.object({
 });
 
 export default function RegisterForm() {
+  const dispatch = useAppDispatch();
+  const loading = useAppSelector(selectRegisterLoading);
   const initialValues: MyFormValues = { email: "", username: "", password: "", confirmPassword: "" };
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={LoginSchema}
-      onSubmit={(values, { setSubmitting }) => {
-        setTimeout(() => {
-          alert(JSON.stringify(values, null, 2));
-          setSubmitting(false);
-        }, 3000);
+      onSubmit={(values) => {
+        dispatch(register(values));
       }}
     >
-      {({ handleSubmit, isSubmitting, errors, values }) => (
+      {({ handleSubmit }) => (
         <Form onSubmit={handleSubmit}>
           <FastField
             name="username"
@@ -63,8 +66,8 @@ export default function RegisterForm() {
             placeholder="Confirm password"
             icon={<i className="fa-solid fa-lock form-icon"></i>}
           />
-          <button className="form-button" disabled={isSubmitting}>
-            Sign up {isSubmitting && <IconLoading />}
+          <button className="form-button" disabled={loading}>
+            Sign up {loading && <IconLoading />}
           </button>
           <div className="form-register">
             <p>Already have an account? </p>
