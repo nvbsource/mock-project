@@ -19,9 +19,6 @@ export const userSlice = createSlice({
     loginSuccess: (state) => {
       state.logging = false;
     },
-    loginFailed: (state) => {
-      state.logging = false;
-    },
     logout(state) {},
     register(state, action: PayloadAction<UserRegister>) {
       state.registerLoading = true;
@@ -31,7 +28,7 @@ export const userSlice = createSlice({
     },
   },
 });
-export const { login, loginSuccess, loginFailed, logout, register, registerSuccess } = userSlice.actions;
+export const { login, loginSuccess, logout, register, registerSuccess } = userSlice.actions;
 export const selectLogging = (state: RootState) => state.user.logging;
 export const selectRegisterLoading = (state: RootState) => state.user.registerLoading;
 export default userSlice.reducer;

@@ -2,53 +2,58 @@ import { useAppSelector } from "app/hooks";
 import {
   fetchArticlesGlobal,
   fetchArticlesYouFeed,
-  fetchTags,
+  selectArticles,
   selectFetchArticleGlobalLoading,
   selectFetchArticleYouFeedLoading,
-  selectTags,
+  selectLimit,
 } from "features/article/articleSlice";
+import { addTag, fetchTags, removeTag, selectTagsList, selectTagsSearchList } from "features/tag/tagSlice";
 import { Article, Tags } from "Layout";
-import ArticleLoading from "Layout/Article/ArticleLoading";
+import PaginationList from "Layout/PaginationList/PaginationList";
 import React, { Fragment, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import { useAppDispatch } from "../../app/hooks";
-import { selectArticles } from "../../features/article/articleSlice";
+import ArticleLoading from "../../Layout/Article/ArticleLoading";
 import ModalForm from "../../Layout/Article/ModalForm";
 
 export default function Home() {
+  const dispatch = useAppDispatch();
+  const localValue = localStorage.getItem("user_information");
+  const information = localValue ? JSON.parse(localValue) : {};
   const [showModal, setShowModal] = useState(false);
-  const [searchTag, setSearchTag] = useState<string[]>([]);
   const [active, setActive] = useState({
     one: {
       name: "You feed",
-      active: true,
+      active: information.username ? true : false,
     },
     two: {
       name: "Global feed",
-      active: false,
+      active: information.username ? false : true,
     },
   });
+  let [searchParams, setSearchParams] = useSearchParams();
+  const currentPage = searchParams.get("page") || "1";
+  const articleList = useAppSelector(selectArticles);
+  const tagsList = useAppSelector(selectTagsList);
+  const searchTags = useSelector(selectTagsSearchList);
   const loadingFeed = useAppSelector(selectFetchArticleYouFeedLoading);
   const loadingGlobal = useAppSelector(selectFetchArticleGlobalLoading);
-  const articleList = useAppSelector(selectArticles);
-  const tagsList = useAppSelector(selectTags);
-  const dispatch = useAppDispatch();
+  const limit = useSelector(selectLimit);
+  const offset = Number(currentPage) * limit - limit;
   useEffect(() => {
-    dispatch(fetchArticlesYouFeed());
     dispatch(fetchTags());
   }, [dispatch]);
   const handleRemoveTag = (tag: string) => {
-    setSearchTag((prevState) => prevState.filter((item) => item !== tag));
+    dispatch(removeTag(tag));
   };
   const handleAddTag = (tag: string) => {
-    const existTag = searchTag.includes(tag);
-    if (!existTag) {
-      return setSearchTag((prev: string[]) => [...prev, tag]);
-    }
+    dispatch(addTag(tag));
   };
   const renderArticles = () => {
     const list =
-      searchTag.length > 0
-        ? articleList.filter((item) => item.tagList.some((tag) => searchTag.find((search) => search === tag)))
+      searchTags.length > 0
+        ? articleList.filter((item) => item.tagList.some((tag) => searchTags.find((search) => search === tag)))
         : articleList;
     if (list.length > 0) {
       return list?.map((item, index) => <Article key={index} information={item} />);
@@ -59,29 +64,33 @@ export default function Home() {
   return (
     <Fragment>
       <ul className="profile-menu home-menu">
-        <li
-          className={`${active["one"].active ? "active" : ""}`}
-          onClick={() => {
-            dispatch(fetchArticlesYouFeed());
-            setActive((prevState) => ({
-              ...prevState,
-              one: {
-                name: "You feed",
-                active: true,
-              },
-              two: {
-                name: "Global feed",
-                active: false,
-              },
-            }));
-          }}
-        >
-          <i className="fa-solid fa-rss"></i> You feed
-        </li>
+        {information.username && (
+          <li
+            className={`${active["one"].active ? "active" : ""}`}
+            onClick={() => {
+              setSearchParams({});
+              dispatch(fetchArticlesYouFeed({ limit, offset: 0 }));
+              setActive((prevState) => ({
+                ...prevState,
+                one: {
+                  name: "You feed",
+                  active: true,
+                },
+                two: {
+                  name: "Global feed",
+                  active: false,
+                },
+              }));
+            }}
+          >
+            <i className="fa-solid fa-rss"></i> You feed
+          </li>
+        )}
         <li
           className={`${active["two"].active ? "active" : ""}`}
           onClick={() => {
-            dispatch(fetchArticlesGlobal());
+            setSearchParams({});
+            dispatch(fetchArticlesGlobal({ limit, offset: 0 }));
             setActive((prevState) => ({
               ...prevState,
               one: {
@@ -100,13 +109,15 @@ export default function Home() {
       </ul>
       <main className="feed">
         <div className="feed-body">
-          <div className="article-add">
-            <div className="article-what" onClick={() => setShowModal(true)}>
-              Bạn đang nghĩ gì?
+          {information.username && (
+            <div className="article-add">
+              <div className="article-what" onClick={() => setShowModal(true)}>
+                Bạn đang nghĩ gì?
+              </div>
             </div>
-          </div>
+          )}
           <div className="tags-content  mb-2">
-            {searchTag.map((item) => (
+            {searchTags.map((item) => (
               <div className="tags-item tags-search" onClick={() => handleRemoveTag(item)}>
                 <span>{item}</span>
                 <i className="fa-solid fa-trash-can tags-close"></i>
@@ -120,11 +131,13 @@ export default function Home() {
                 <ArticleLoading />
                 <ArticleLoading />
                 <ArticleLoading />
-                <ArticleLoading />
               </Fragment>
             ) : (
-              <Fragment>{renderArticles()}</Fragment>
+              renderArticles()
             )}
+          </div>
+          <div className="d-flex justify-content-center mt-3">
+            <PaginationList limit={limit} offset={offset} pageActive={active} />
           </div>
         </div>
         <div className="tags">

@@ -6,6 +6,8 @@ import aricleReducer from "../features/article/articleSlice";
 import profileReducer from "../features/profile/profileSlice";
 import userReducer from "../features/auth/authSlice";
 import rootSaga from "./rootSaga";
+import commentReducer from "features/comment/commentSlice";
+import tagReducer from "features/tag/tagSlice";
 const sagaMiddleware = createSagaMiddleware();
 const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHistoryContext({
   history: createBrowserHistory(),
@@ -14,7 +16,9 @@ export const store = configureStore({
   reducer: {
     user: userReducer,
     article: aricleReducer,
+    comment: commentReducer,
     profile: profileReducer,
+    tags: tagReducer,
     router: routerReducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(sagaMiddleware, routerMiddleware),

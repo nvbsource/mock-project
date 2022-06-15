@@ -41,3 +41,8 @@ export interface ArticleModal {
   description: string;
   tagList: string[];
 }
+export interface ParamsArticle {
+  author?: string;
+  limit?: number;
+  offset?: number;
+}

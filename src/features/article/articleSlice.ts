@@ -1,20 +1,21 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "app/store";
-import { Comment, CommentUpload, IArticle } from "models/article.model";
+import { IArticle } from "models/article.model";
 import { ArticleCreate } from "../../models/article.model";
 
 export interface ArticleState {
   loadingFetchArticleGlobal: boolean;
   loadingFetchArticleYouFeed: boolean;
-  loadingFetchArticleFavorite: boolean;
-  loadingFetchComment: boolean;
-  loadingAddComment: boolean;
-  loadingDeleteComment: boolean;
+  loadingFetchArticleFavoriteByAuthor: boolean;
+  loadingFetchArticleByAuthor: boolean;
   loadingCreateArticle: boolean;
+  loadingDetailArticle: boolean;
+  articleDetail: IArticle;
   articles: IArticle[];
-  comments: Comment[];
-  slugLoading: string;
   tags: string[];
+  limit: number;
+  totalArticleGlobal: number;
+  totalArticleYouFeed: number;
 }
 export interface Favotite {
   slug: string;
@@ -27,24 +28,39 @@ export interface DeleteArticle {
   setDeleteLoading: any;
 }
 const initialState: ArticleState = {
+  loadingFetchArticleByAuthor: false,
+  loadingFetchArticleFavoriteByAuthor: false,
   loadingFetchArticleGlobal: false,
   loadingFetchArticleYouFeed: false,
-  loadingFetchArticleFavorite: false,
-  loadingFetchComment: false,
-  loadingAddComment: false,
-  loadingDeleteComment: false,
   loadingCreateArticle: false,
+  loadingDetailArticle: false,
+  articleDetail: {
+    slug: "",
+    title: "",
+    description: "",
+    body: "",
+    tagList: [],
+    favorited: false,
+    favoritesCount: 0,
+    author: {
+      username: "",
+      bio: "",
+      image: "",
+      following: false,
+    },
+  },
   articles: [],
-  comments: [],
-  slugLoading: "",
   tags: [],
+  limit: 3,
+  totalArticleGlobal: 0,
+  totalArticleYouFeed: 0,
 };
 
 const articleSlice = createSlice({
   name: "article",
   initialState,
   reducers: {
-    fetchArticlesGlobal: (state) => {
+    fetchArticlesGlobal: (state, action: PayloadAction<{ limit: number; offset: number }>) => {
       state.loadingFetchArticleGlobal = true;
     },
     fetchArticlesGlobalSuccess: (state, action: PayloadAction<IArticle[]>) => {
@@ -54,17 +70,45 @@ const articleSlice = createSlice({
     fetchArticlesGlobalFailed: (state, action: PayloadAction<string>) => {
       state.loadingFetchArticleGlobal = false;
     },
-    fetchArticlesFavorite: (state, action: PayloadAction<string>) => {
-      state.loadingFetchArticleFavorite = true;
+
+    setTotalArticleGlobal: (state, action: PayloadAction<number>) => {
+      state.totalArticleGlobal = action.payload;
     },
-    fetchArticlesFavoriteSuccess: (state, action: PayloadAction<IArticle[]>) => {
-      state.loadingFetchArticleFavorite = false;
+    setTotalArticleYouFeed: (state, action: PayloadAction<number>) => {
+      state.totalArticleYouFeed = action.payload;
+    },
+
+    fetchArticlesByAuthor: (state, action: PayloadAction<string>) => {
+      state.loadingFetchArticleByAuthor = true;
+    },
+    fetchArticlesByAuthorSuccess: (state, action: PayloadAction<IArticle[]>) => {
+      state.loadingFetchArticleByAuthor = false;
       state.articles = action.payload;
     },
-    fetchArticlesFavoriteFailed: (state, action: PayloadAction<string>) => {
-      state.loadingFetchArticleFavorite = false;
+
+    fetchArticlesFavoriteByAuthor: (state, action: PayloadAction<string>) => {
+      state.loadingFetchArticleFavoriteByAuthor = true;
     },
-    fetchArticlesYouFeed: (state) => {
+    fetchArticlesFavoriteByAuthorSuccess: (state, action: PayloadAction<IArticle[]>) => {
+      state.loadingFetchArticleFavoriteByAuthor = false;
+      state.articles = action.payload;
+    },
+    fetchArticlesFavoriteByAuthorFailed: (state) => {
+      state.loadingFetchArticleFavoriteByAuthor = false;
+    },
+
+    fetchDetailArticle: (state, action: PayloadAction<string>) => {
+      state.loadingDetailArticle = true;
+    },
+    fetchDetailArticleSuccess: (state, action: PayloadAction<IArticle>) => {
+      state.loadingDetailArticle = false;
+      state.articleDetail = action.payload;
+    },
+    fetchDetailArticleFailed: (state, action: PayloadAction<string>) => {
+      state.loadingDetailArticle = false;
+    },
+
+    fetchArticlesYouFeed: (state, action: PayloadAction<{ limit: number; offset: number }>) => {
       state.loadingFetchArticleYouFeed = true;
     },
     fetchArticlesYouFeedSuccess: (state, action: PayloadAction<IArticle[]>) => {
@@ -74,29 +118,12 @@ const articleSlice = createSlice({
     fetchArticlesYouFeedFailed: (state, action: PayloadAction<string>) => {
       state.loadingFetchArticleYouFeed = false;
     },
-    fetchComments: (state, action: PayloadAction<string>) => {
-      state.loadingFetchComment = true;
-    },
-    fetchCommentSuccess: (state, action: PayloadAction<Comment[]>) => {
-      state.loadingFetchComment = false;
-      state.comments = action.payload;
-    },
-    fetchCommentFailed: (state, action: PayloadAction<string>) => {
-      state.loadingFetchComment = false;
-    },
+
     fetchTags: () => {},
     fetchTagsSuccess: (state, action: PayloadAction<string[]>) => {
       state.tags = action.payload;
     },
-    addCommentArticle: (state, action: PayloadAction<CommentUpload>) => {
-      state.loadingAddComment = true;
-    },
-    addCommentToArticleSuccess: (state, action: PayloadAction<string>) => {
-      state.loadingAddComment = false;
-    },
-    addCommentToArticlefailed: (state, action: PayloadAction<string>) => {
-      state.loadingAddComment = false;
-    },
+
     favoriteArticle: (state, action: PayloadAction<Favotite>) => {
       const articleExist = state.articles.find((item) => item.slug === action.payload.slug);
       if (articleExist) {
@@ -109,9 +136,6 @@ const articleSlice = createSlice({
             break;
         }
       }
-    },
-    setSlugLoading: (state, action: PayloadAction<string>) => {
-      state.slugLoading = action.payload;
     },
     favoriteArticleSuccess: (state, action: PayloadAction<Favotite>) => {
       const articleExist = state.articles.find((item) => item.slug === action.payload.slug);
@@ -157,58 +181,51 @@ const articleSlice = createSlice({
     editArticleFailed: (state) => {
       state.loadingCreateArticle = false;
     },
-    deleteComment: (state, action: PayloadAction<{ slug: string; idComment: number }>) => {
-      state.loadingDeleteComment = true;
-    },
-    deleteCommentSuccess: (state) => {
-      state.loadingDeleteComment = false;
-    },
-    deleteCommentFailed: (state) => {
-      state.loadingDeleteComment = false;
-    },
     deleteArticle: (state, action: PayloadAction<DeleteArticle>) => {},
   },
 });
 
 export const {
-  addCommentArticle,
-  addCommentToArticleSuccess,
-  addCommentToArticlefailed,
   fetchArticlesGlobal,
   fetchArticlesGlobalFailed,
   fetchArticlesGlobalSuccess,
-  fetchArticlesFavorite,
-  fetchArticlesFavoriteFailed,
-  fetchArticlesFavoriteSuccess,
   fetchArticlesYouFeed,
   fetchArticlesYouFeedFailed,
   fetchArticlesYouFeedSuccess,
-  fetchComments,
-  fetchCommentFailed,
-  fetchCommentSuccess,
   fetchTags,
   fetchTagsSuccess,
   createArticle,
   createArticleSuccess,
   createArticleFailed,
   editArticle,
+  editArticleSuccess,
+  editArticleFailed,
   favoriteArticle,
   favoriteArticleSuccess,
   favoriteArticleFaild,
-  deleteComment,
-  deleteCommentSuccess,
-  deleteCommentFailed,
   deleteArticle,
-  setSlugLoading,
+  fetchArticlesByAuthor,
+  fetchArticlesByAuthorSuccess,
+  fetchArticlesFavoriteByAuthor,
+  fetchArticlesFavoriteByAuthorSuccess,
+  fetchArticlesFavoriteByAuthorFailed,
+  fetchDetailArticle,
+  fetchDetailArticleSuccess,
+  fetchDetailArticleFailed,
+  setTotalArticleGlobal,
+  setTotalArticleYouFeed,
 } = articleSlice.actions;
 export const selectArticles = (state: RootState) => state.article.articles;
-export const selectComments = (state: RootState) => state.article.comments;
+export const selectTotalArticleGlobal = (state: RootState) => state.article.totalArticleGlobal;
+export const selectTotalArticleYouFeed = (state: RootState) => state.article.totalArticleYouFeed;
 export const selectTags = (state: RootState) => state.article.tags;
+export const selectLimit = (state: RootState) => state.article.limit;
 export const selectFetchArticleGlobalLoading = (state: RootState) => state.article.loadingFetchArticleGlobal;
 export const selectFetchArticleYouFeedLoading = (state: RootState) => state.article.loadingFetchArticleYouFeed;
-export const selectFetchArticleFavoriteLoading = (state: RootState) => state.article.loadingFetchArticleFavorite;
-export const selectFetchCommentLoading = (state: RootState) => state.article.loadingFetchComment;
-export const selectAddCommentLoading = (state: RootState) => state.article.loadingAddComment;
 export const selectCreateLoading = (state: RootState) => state.article.loadingCreateArticle;
-export const selectSlugLoading = (state: RootState) => state.article.slugLoading;
+export const selectLoadingFetchArticleByAuthor = (state: RootState) => state.article.loadingFetchArticleByAuthor;
+export const selectLoadingFetchArticleFavoriteByAuthor = (state: RootState) =>
+  state.article.loadingFetchArticleFavoriteByAuthor;
+export const selectDetailArticle = (state: RootState) => state.article.articleDetail;
+export const selectLoadingDetailArticle = (state: RootState) => state.article.loadingDetailArticle;
 export default articleSlice.reducer;

@@ -1,4 +1,4 @@
-import { CommentUpload } from "models/article.model";
+import { CommentUpload, ParamsArticle } from "models/article.model";
 import httpRequest from "../api/configApi";
 import { ArticleCreate } from "../models/article.model";
 const articles = {
@@ -11,16 +11,22 @@ const articles = {
   deleteArticle: (slug: string) => {
     return httpRequest.delete(`/articles/${slug}`);
   },
-  getListArticlesFilter: ({ author = "", limit = 20, offset = 0 }) => {
+  getListArticlesFilter: ({ author, limit = 10, offset = 0 }: ParamsArticle) => {
     return httpRequest.get(`/articles?author=${author}&limit=${limit}&offset=${offset}`);
   },
-  getListArticlesFavorite: ({ author = "", limit = 20, offset = 0 }) => {
+  getListArticlesFavorite: ({ author, limit = 10, offset = 0 }: ParamsArticle) => {
     return httpRequest.get(`/articles?favorited=${author}&limit=${limit}&offset=${offset}`);
   },
-  getListArticles: () => {
+  getListArticles: ({ limit = 10, offset = 0 }) => {
+    return httpRequest.get(`/articles?limit=${limit}&offset=${offset}`);
+  },
+  getTotalArticles: () => {
     return httpRequest.get(`/articles`);
   },
-  getListArticlesFeed: () => {
+  getListArticlesFeed: ({ limit = 10, offset = 0 }) => {
+    return httpRequest.get(`/articles/feed?limit=${limit}&offset=${offset}`);
+  },
+  getTotalArticlesFeed: () => {
     return httpRequest.get(`/articles/feed`);
   },
   getArticle: (slug: string) => {
@@ -38,7 +44,7 @@ const articles = {
   addCommentToArticle: ({ slug, body }: CommentUpload) => {
     return httpRequest.post(`/articles/${slug}/comments`, { comment: { body } });
   },
-  deleteCommentInArticle: (slug: string, idComment: string) => {
+  deleteCommentInArticle: (slug: string, idComment: number) => {
     return httpRequest.delete(`/articles/${slug}/comments/${idComment}`);
   },
 };

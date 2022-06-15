@@ -1,20 +1,20 @@
 import { useAppSelector } from "app/hooks";
 import {
-  fetchArticlesFavorite,
+  fetchArticlesFavoriteByAuthor,
   selectArticles,
-  selectFetchArticleFavoriteLoading,
+  selectLoadingFetchArticleFavoriteByAuthor,
 } from "features/article/articleSlice";
 import { Article, ArticleLoading } from "Layout";
 import React, { Fragment, useEffect } from "react";
 import { useAppDispatch } from "../../app/hooks";
-const localValue = localStorage.getItem("access_token");
 export default function FavoriteArticles() {
+  const localValue = localStorage.getItem("user_information");
   const information = localValue ? JSON.parse(localValue) : {};
   const dispatch = useAppDispatch();
   const articleList = useAppSelector(selectArticles);
-  const loading = useAppSelector(selectFetchArticleFavoriteLoading);
+  const loading = useAppSelector(selectLoadingFetchArticleFavoriteByAuthor);
   useEffect(() => {
-    dispatch(fetchArticlesFavorite(information.username));
+    dispatch(fetchArticlesFavoriteByAuthor(information.username));
   }, [dispatch, information.username]);
   return (
     <div className="articles">

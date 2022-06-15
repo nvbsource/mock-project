@@ -4,8 +4,8 @@ import React from "react";
 import { Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-const localValue = localStorage.getItem("access_token");
 export default function Information() {
+  const localValue = localStorage.getItem("user_information");
   const information = localValue ? JSON.parse(localValue) : {};
   const author = useAppSelector(selectAuthor);
   const loadingFollow = useAppSelector(selectLoadingFollowProfile);

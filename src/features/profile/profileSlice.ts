@@ -1,13 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "app/store";
-import { InformationUser } from "models/user.model";
+import { InformationUser, UpdateInformationUser } from "models/user.model";
 export interface ProfileState {
   loading?: boolean;
+  loadingUpdate: boolean;
   loadingFollow: boolean;
   author: InformationUser;
 }
 const initialState: ProfileState = {
   loading: false,
+  loadingUpdate: false,
   loadingFollow: false,
   author: {
     username: "",
@@ -47,6 +49,12 @@ const profileSlice = createSlice({
     followProfileFailed: (state) => {
       state.loadingFollow = false;
     },
+    updateProfile: (state, action: PayloadAction<UpdateInformationUser>) => {
+      state.loadingUpdate = true;
+    },
+    updateProfileSuccess: (state) => {
+      state.loadingUpdate = false;
+    },
   },
 });
 export const {
@@ -56,8 +64,11 @@ export const {
   followProfile,
   followProfileSuccess,
   followProfileFailed,
+  updateProfile,
+  updateProfileSuccess,
 } = profileSlice.actions;
 export const selectLoadingProfile = (state: RootState) => state.profile.loading;
+export const selectLoadingUpdateProfile = (state: RootState) => state.profile.loadingUpdate;
 export const selectLoadingFollowProfile = (state: RootState) => state.profile.loadingFollow;
 export const selectAuthor = (state: RootState) => state.profile.author;
 export default profileSlice.reducer;

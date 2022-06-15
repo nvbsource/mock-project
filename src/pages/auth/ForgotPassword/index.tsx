@@ -4,7 +4,7 @@ import Form from "../../../HOC/Form";
 import { Navigate } from "react-router-dom";
 
 export default function ForgotPassword() {
-  const access_token = localStorage.getItem("access_token");
+  const access_token = localStorage.getItem("user_information");
   if (access_token) {
     return <Navigate to="/" />;
   }

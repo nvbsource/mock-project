@@ -7,6 +7,8 @@ import App from "./App";
 import { history, store } from "./app/store";
 import GlobalStyles from "./components/GlobalStyles/index";
 import "./index.scss";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 const container = document.getElementById("root")!;
 const root = createRoot(container);
 
@@ -16,6 +18,7 @@ root.render(
       <GlobalStyles>
         <App />
       </GlobalStyles>
+      <ToastContainer />
     </Provider>
   </Router>
 );

@@ -13,3 +13,8 @@ export interface InformationUser {
   image: string;
   following?: boolean;
 }
+export interface UpdateInformationUser {
+  username: string;
+  bio: string;
+  image: string;
+}

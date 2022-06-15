@@ -45,11 +45,9 @@ function App() {
       <Route
         path="/profile/:slug"
         element={
-          <PrivateRoutes>
-            <DefaultLayout>
-              <Profile />
-            </DefaultLayout>
-          </PrivateRoutes>
+          <DefaultLayout>
+            <Profile />
+          </DefaultLayout>
         }
       />
       <Route
@@ -75,11 +73,9 @@ function App() {
       <Route
         path="/article/:slug"
         element={
-          <PrivateRoutes>
-            <DefaultLayout>
-              <DetailArticle />
-            </DefaultLayout>
-          </PrivateRoutes>
+          <DefaultLayout>
+            <DetailArticle />
+          </DefaultLayout>
         }
       />
       <Route path="*" element={<Navigate to="/" />} />

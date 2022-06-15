@@ -5,31 +5,38 @@
   --bg-white: #fff;
   --bg-primary: #0281ff;
 }
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
+
 * {
   margin: 0;
   padding: 0;
 }
+
 ::-webkit-scrollbar {
   width: 8px;
   background-color: white;
 }
+
 ::-webkit-scrollbar-thumb {
   background-color: #027fff;
   border-radius: 8px;
   background-image: -webkit-linear-gradient(90deg, #0006 25%, #0000 0, #0000 50%, #0006 0, #0006 75%, #0000 0, #0000);
 }
+
 ::-webkit-scrollbar-track {
   border-radius: 8px;
 }
+
 html,
 body {
   height: 100%;
 }
+
 body {
   line-height: 1.5;
   color: var(--white-color);
@@ -45,6 +52,7 @@ svg {
   display: block;
   max-width: 100%;
 }
+
 input,
 button,
 textarea,
@@ -52,6 +60,7 @@ select {
   font: inherit;
   outline: none;
 }
+
 p,
 h1,
 h2,
@@ -61,15 +70,18 @@ h5,
 h6 {
   overflow-wrap: break-word;
 }
+
 input:focus {
   outline: none;
 }
+
 .lds-ring {
   display: inline-block;
   position: relative;
   width: 20px;
   height: 20px;
 }
+
 .lds-ring div {
   box-sizing: border-box;
   display: block;
@@ -81,15 +93,19 @@ input:focus {
   animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   border-color: #fff transparent transparent transparent;
 }
+
 .lds-ring div:nth-child(1) {
   animation-delay: -0.45s;
 }
+
 .lds-ring div:nth-child(2) {
   animation-delay: -0.3s;
 }
+
 .lds-ring div:nth-child(3) {
   animation-delay: -0.15s;
 }
+
 @keyframes lds-ring {
   0% {
     transform: rotate(0deg);
@@ -99,25 +115,29 @@ input:focus {
   }
 }
 
-.form-control {
-  &:focus {
-    box-shadow: none;
-  }
+.form-control:focus {
+  box-shadow: none;
 }
+
 .resize-none {
   resize: none;
 }
+
 .spinner-big {
   width: 150px;
   height: 150px;
   margin: 0 auto;
 }
+
 .page-link {
   color: #4e5d78;
 }
+
 .page-item.active .page-link {
   background-color: #4e5d78;
 }
+
 .page-item.disabled {
   opacity: 0.5;
 }
+/*# sourceMappingURL=index.css.map */

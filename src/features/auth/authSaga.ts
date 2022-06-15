@@ -1,60 +1,69 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { AxiosResponse } from "axios";
-import { login, loginFailed, loginSuccess, logout, register, registerSuccess } from "features/auth/authSlice";
+import { login, loginSuccess, logout, register, registerSuccess } from "features/auth/authSlice";
+import { toast } from "react-toastify";
 import { push } from "redux-first-history";
 import { call, put, takeEvery } from "redux-saga/effects";
-import Swal from "sweetalert2";
 import { UserLogin, UserRegister } from "../../models/user.model";
 import apiUsers from "../../services/user.service";
+import configAPI from "api/configApi";
 function* handleLogin(action: PayloadAction<UserLogin>) {
+  const toastId = toast.loading("Please wait...");
   try {
     const response: AxiosResponse = yield call(apiUsers.login, action.payload);
-    localStorage.setItem("access_token", JSON.stringify(response.data.user));
+    localStorage.setItem("user_information", JSON.stringify(response.data.user));
+    configAPI.defaults.headers.common["Authorization"] = `Bearer ${response.data.user.token}`;
     yield put(loginSuccess());
-    const Toast = Swal.mixin({
-      toast: true,
-      position: "top-end",
-      showConfirmButton: false,
-      timer: 2000,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener("mouseenter", Swal.stopTimer);
-        toast.addEventListener("mouseleave", Swal.resumeTimer);
-      },
-    });
-
-    yield Toast.fire({
-      icon: "success",
-      title: "Currently logged",
+    yield toast.update(toastId, {
+      render: "Log in successfull",
+      type: "success",
+      isLoading: false,
+      autoClose: 1000,
     });
     yield put(push("/"));
-  } catch (error) {
-    yield Swal.fire({
-      title: "Error!",
-      text: `Login failed`,
-      icon: "error",
+  } catch (e: any) {
+    const errors = Object.keys(e.response.data.errors);
+    let content = "";
+    errors.forEach((key: any) => {
+      content += `${key}: ${e.response.data.errors[key]}`;
     });
-    yield put(loginFailed());
+    yield put(loginSuccess());
+    yield toast.update(toastId, {
+      render: content,
+      type: "error",
+      isLoading: false,
+      autoClose: 1000,
+    });
   }
 }
 function* handleLogout() {
-  yield localStorage.removeItem("access_token");
+  yield localStorage.removeItem("user_information");
+  yield (configAPI.defaults.headers.common["Authorization"] = "");
   yield put(push("/login"));
+  yield toast("Logout success", { type: "success", autoClose: 1000 });
 }
 function* handleRegister(action: PayloadAction<UserRegister>) {
+  const toastId = toast.loading("Please wait...");
   try {
     yield apiUsers.register(action.payload);
-    yield Swal.fire({
-      title: "Success",
-      text: `Register successfull!`,
-      icon: "success",
+    yield toast.update(toastId, {
+      render: "Register successfull",
+      type: "success",
+      isLoading: false,
+      autoClose: 1000,
     });
     yield put(login({ email: action.payload.email, password: action.payload.password }));
-  } catch (e) {
-    yield Swal.fire({
-      title: "Error",
-      text: `Register failed!`,
-      icon: "error",
+  } catch (e: any) {
+    const errors = Object.keys(e.response.data.errors);
+    let content = "";
+    errors.forEach((key: any) => {
+      content += `${key}: ${e.response.data.errors[key]}`;
+    });
+    yield toast.update(toastId, {
+      render: content,
+      type: "error",
+      isLoading: false,
+      autoClose: 1000,
     });
   } finally {
     yield put(registerSuccess());

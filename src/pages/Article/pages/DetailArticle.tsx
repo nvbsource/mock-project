@@ -1,55 +1,45 @@
+import { fetchDetailArticle, selectDetailArticle, selectLoadingDetailArticle } from "features/article/articleSlice";
 import {
-  addCommentArticle,
-  deleteComment,
-  fetchArticlesGlobal,
+  addComment,
   fetchComments,
-  selectAddCommentLoading,
-  selectArticles,
   selectComments,
-  selectFetchCommentLoading,
-} from "features/article/articleSlice";
+  selectLoading,
+  selectLoadingAdd,
+} from "features/comment/commentSlice";
 import { Article, ArticleLoading } from "Layout";
-import { IArticle } from "models/article.model";
+import CommentItem from "Layout/Article/CommentItem";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import CommentLoading from "../../../Layout/Article/CommentLoading";
-const localValue = localStorage.getItem("access_token");
 export default function DetailArticle() {
-  const information = localValue ? JSON.parse(localValue) : {};
-  const [comment, setComment] = useState<string>("");
-  const [detailArticle, setArticle] = useState<IArticle>();
   const dispatch = useAppDispatch();
   const { slug } = useParams();
-  const articles = useAppSelector(selectArticles);
-  const comments = useAppSelector(selectComments);
-  const loadingComments = useAppSelector(selectAddCommentLoading);
-  const loadingFetchComments = useAppSelector(selectFetchCommentLoading);
+  const [comment, setComment] = useState<string>("");
+  const loadingDetailArticle = useAppSelector(selectLoadingDetailArticle);
+  const loadingAddComments = useAppSelector(selectLoadingAdd);
+  const loadingFetchComments = useAppSelector(selectLoading);
+  const detailArticle = useAppSelector(selectDetailArticle);
+  const commentsList = useAppSelector(selectComments);
+
   useEffect(() => {
-    dispatch(fetchArticlesGlobal());
+    dispatch(fetchDetailArticle(slug as string));
     dispatch(fetchComments(slug as string));
   }, [dispatch, slug]);
   useEffect(() => {
-    if (!loadingComments && !loadingFetchComments) {
+    if (!loadingAddComments && !loadingFetchComments) {
       setComment("");
     }
-  }, [loadingComments, loadingFetchComments]);
-  useEffect(() => {
-    const articleExist = articles.find((item) => item.slug === slug);
-    if (articleExist) {
-      setArticle(articleExist);
-    }
-  }, [slug, articles]);
+  }, [loadingAddComments, loadingFetchComments]);
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    dispatch(addCommentArticle({ slug: slug as string, body: comment as string }));
+    dispatch(addComment({ slug: slug as string, body: comment as string }));
   };
-  const handleDeleteComment = (idComment: number) => {
-    dispatch(deleteComment({ slug: slug as string, idComment }));
-  };
+
   return (
     <div className="detail">
-      {!detailArticle ? <ArticleLoading /> : <Article information={detailArticle} detail={true} />}
+      {loadingDetailArticle ? <ArticleLoading /> : <Article information={detailArticle} detail={true} />}
       <div className="comments">
         <form className="comments-write" onSubmit={handleSubmit}>
           <input
@@ -58,25 +48,13 @@ export default function DetailArticle() {
             placeholder="Enter comment"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            disabled={loadingComments || loadingFetchComments}
+            disabled={loadingAddComments}
           />
         </form>
-        {loadingComments || loadingFetchComments ? (
+        {loadingFetchComments ? (
           <CommentLoading />
         ) : (
-          comments?.map((item, index) => (
-            <div key={index} className="comments-item">
-              <div className="comments-author">
-                <img src={item.author.image} alt="" className="comments-avatar" />
-                <h6 className="comments-name">{item.author.username}</h6>
-                <span className="comments-date">{item.createdAt}</span>
-              </div>
-              <p className="comments-content">{item.body}</p>
-              {information.username === item.author.username && (
-                <i className="fa-solid fa-trash-can comments-delete" onClick={() => handleDeleteComment(item.id)}></i>
-              )}
-            </div>
-          ))
+          commentsList.map((item, index) => <CommentItem key={index} slug={slug as string} comment={item} />)
         )}
       </div>
     </div>

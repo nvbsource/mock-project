@@ -1,105 +1,90 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { AxiosResponse } from "axios";
+import { toast } from "react-toastify";
 import { push } from "redux-first-history";
-import { call, put, takeEvery, takeLatest } from "redux-saga/effects";
+import { call, put, takeEvery, takeLatest, all } from "redux-saga/effects";
 import apiArticle from "services/articles.service";
-import apiTags from "services/tags.service";
-import Swal from "sweetalert2";
-import { ArticleCreate, CommentUpload, IArticle } from "../../models/article.model";
+import { ArticleCreate, IArticle } from "../../models/article.model";
 import {
-  addCommentArticle,
-  addCommentToArticlefailed,
-  addCommentToArticleSuccess,
   createArticle,
   createArticleSuccess,
   DeleteArticle,
   deleteArticle,
-  deleteComment,
   editArticle,
+  editArticleFailed,
+  editArticleSuccess,
   favoriteArticle,
   favoriteArticleFaild,
   favoriteArticleSuccess,
   Favotite,
-  fetchArticlesFavorite,
-  fetchArticlesFavoriteFailed,
-  fetchArticlesFavoriteSuccess,
+  fetchArticlesByAuthor,
+  fetchArticlesByAuthorSuccess,
+  fetchArticlesFavoriteByAuthor,
+  fetchArticlesFavoriteByAuthorFailed,
+  fetchArticlesFavoriteByAuthorSuccess,
   fetchArticlesGlobal,
   fetchArticlesGlobalFailed,
   fetchArticlesGlobalSuccess,
   fetchArticlesYouFeed,
   fetchArticlesYouFeedFailed,
   fetchArticlesYouFeedSuccess,
-  fetchCommentFailed,
-  fetchComments,
-  fetchCommentSuccess,
-  fetchTags,
-  fetchTagsSuccess,
+  fetchDetailArticle,
+  fetchDetailArticleFailed,
+  fetchDetailArticleSuccess,
+  setTotalArticleGlobal,
+  setTotalArticleYouFeed,
 } from "./articleSlice";
-const Toast = Swal.mixin({
-  toast: true,
-  position: "top-end",
-  showConfirmButton: false,
-  timer: 2000,
-  timerProgressBar: true,
-  didOpen: (toast) => {
-    toast.addEventListener("mouseenter", Swal.stopTimer);
-    toast.addEventListener("mouseleave", Swal.resumeTimer);
-  },
-});
-function* handleFetchArticlsGlobal(action: PayloadAction<string>) {
+function* handleFetchArticlsGlobal(action: PayloadAction<{ limit: number; offset: number }>) {
   try {
-    const response: AxiosResponse = yield call(apiArticle.getListArticles);
-    yield put(fetchArticlesGlobalSuccess(response.data.articles));
+    const response: AxiosResponse[] = yield all([
+      call(apiArticle.getListArticles, action.payload),
+      call(apiArticle.getTotalArticles),
+    ]);
+    const [list, total] = response;
+    yield put(fetchArticlesGlobalSuccess(list.data.articles));
+    yield put(setTotalArticleGlobal(total.data.articlesCount));
   } catch (e) {
     yield put(fetchArticlesGlobalFailed("Get data failed"));
   }
 }
-function* handleFetchArticlsFeed(action: PayloadAction<string>) {
+function* handleFetchArticlsFeed(action: PayloadAction<{ limit: number; offset: number }>) {
   try {
-    const response: AxiosResponse = yield call(apiArticle.getListArticlesFeed);
-    yield put(fetchArticlesYouFeedSuccess(response.data.articles));
+    const response: AxiosResponse[] = yield all([
+      call(apiArticle.getListArticlesFeed, action.payload),
+      call(apiArticle.getTotalArticlesFeed),
+    ]);
+    const [list, total] = response;
+    yield put(fetchArticlesYouFeedSuccess(list.data.articles));
+    yield put(setTotalArticleYouFeed(total.data.articlesCount));
   } catch (e) {
     yield put(fetchArticlesYouFeedFailed("Get data failed"));
   }
 }
-function* handleFetchArticlsFavorite(action: PayloadAction<string>) {
+function* handleFetchDetailArticle(action: PayloadAction<string>) {
   try {
-    const response: AxiosResponse = yield call(apiArticle.getListArticlesFavorite, {
-      author: action.payload,
+    const response: AxiosResponse = yield call(apiArticle.getArticle, action.payload);
+    yield put(fetchDetailArticleSuccess(response.data.article));
+  } catch (e) {
+    toast("Not found", {
+      type: "warning",
+      autoClose: 1000,
     });
-    yield put(fetchArticlesFavoriteSuccess(response.data.articles));
-  } catch (e) {
-    yield put(fetchArticlesFavoriteFailed("Get data failed"));
+    yield put(push("/"));
+    yield put(fetchDetailArticleFailed("Get data failed"));
   }
 }
-function* handleFetchComments(action: PayloadAction<string>) {
+function* handleFetchArticlsByAuthor(action: PayloadAction<string>) {
   try {
-    const response: AxiosResponse = yield call(apiArticle.getCommentsInArticle, action.payload);
-    yield put(fetchCommentSuccess(response.data.comments));
-  } catch (e) {
-    yield put(fetchCommentFailed("Get data failed"));
-  }
-}
-function* handleFetchTags() {
-  try {
-    const response: AxiosResponse = yield call(apiTags.getTags);
-    yield put(fetchTagsSuccess(response.data.tags));
+    const response: AxiosResponse = yield call(apiArticle.getListArticlesFilter, { author: action.payload });
+    yield put(fetchArticlesByAuthorSuccess(response.data.articles));
   } catch (e) {}
 }
-function* handleAddComment(action: PayloadAction<CommentUpload>) {
+function* handleFetchArticlsFavoriteByAuthor(action: PayloadAction<string>) {
   try {
-    yield call(apiArticle.addCommentToArticle, action.payload);
-    yield put(addCommentToArticleSuccess(action.payload.slug));
+    const response: AxiosResponse = yield call(apiArticle.getListArticlesFavorite, { author: action.payload });
+    yield put(fetchArticlesFavoriteByAuthorSuccess(response.data.articles));
   } catch (e) {
-    yield put(addCommentToArticlefailed("Comment failed"));
-  }
-}
-function* handleDeleteComment(action: PayloadAction<{ slug: string; idComment: string }>) {
-  try {
-    yield call(apiArticle.deleteCommentInArticle, action.payload.slug, action.payload.idComment);
-    yield put(addCommentToArticleSuccess(action.payload.slug));
-  } catch (e) {
-    yield put(addCommentToArticlefailed("Comment failed"));
+    yield put(fetchArticlesFavoriteByAuthorFailed());
   }
 }
 function* handleDeleteArticle(action: PayloadAction<DeleteArticle>) {
@@ -111,32 +96,35 @@ function* handleDeleteArticle(action: PayloadAction<DeleteArticle>) {
     action.payload.setDeleteLoading("failed");
   }
 }
-function* handleAddCommentSuccess(action: PayloadAction<string>) {
-  yield put(fetchComments(action.payload));
-}
 function* handleCreateArticle(action: PayloadAction<ArticleCreate>) {
+  const toastId = toast.loading("Please wait...");
   try {
     const response: AxiosResponse = yield call(apiArticle.create, action.payload);
-    yield Toast.fire({
-      icon: "success",
-      title: "Create Article successfully",
+    yield toast.update(toastId, {
+      render: "Created Article Successfull",
+      type: "success",
+      isLoading: false,
+      autoClose: 1000,
     });
     yield put(push(`/article/${response.data.article.slug}`));
   } catch (e: any) {
     const errors = Object.keys(e.response.data.errors);
     let content = "";
     errors.forEach((key: any) => {
-      content += `<div>${key}: ${e.response.data.errors[key]}</div>`;
+      content += `${key}: ${e.response.data.errors[key]}`;
     });
-    yield Toast.fire({
-      icon: "error",
-      title: content,
+    yield toast.update(toastId, {
+      render: content,
+      type: "error",
+      isLoading: false,
+      autoClose: 1000,
     });
   } finally {
     yield put(createArticleSuccess());
   }
 }
 function* handleEditArticle(action: PayloadAction<IArticle>) {
+  const toastId = toast.loading("Please wait...");
   try {
     const response: AxiosResponse = yield call(apiArticle.updateArticle, action.payload.slug, {
       title: action.payload.title,
@@ -144,18 +132,28 @@ function* handleEditArticle(action: PayloadAction<IArticle>) {
       tagList: action.payload.tagList,
       body: action.payload.body,
     });
-    yield Toast.fire({
-      icon: "success",
-      title: "Update Article successfully",
+    yield toast.update(toastId, {
+      render: "Edit Article Successfull",
+      type: "success",
+      isLoading: false,
+      autoClose: 1000,
     });
+    yield put(editArticleSuccess());
+    yield put(fetchDetailArticleSuccess(response.data.article));
     yield put(push(`/article/${response.data.article.slug}`));
   } catch (e: any) {
-    yield Toast.fire({
-      icon: "error",
-      title: e.response.data.message,
+    yield put(editArticleFailed());
+    const errors = Object.keys(e.response.data.errors);
+    let content = "";
+    errors.forEach((key: any) => {
+      content += `${key}: ${e.response.data.errors[key]}`;
     });
-  } finally {
-    yield put(createArticleSuccess());
+    yield toast.update(toastId, {
+      render: content,
+      type: "error",
+      isLoading: false,
+      autoClose: 1000,
+    });
   }
 }
 function* handleFavoriteArticle(action: PayloadAction<Favotite>) {
@@ -168,25 +166,34 @@ function* handleFavoriteArticle(action: PayloadAction<Favotite>) {
         yield call(apiArticle.unFavoriteArticle, action.payload.slug);
         break;
     }
-    action.payload.setSlugLoading("");
-    action.payload.setLoadingFavorite(false);
     yield put(favoriteArticleSuccess(action.payload));
+    yield toast(`${action.payload.type} successfull`, {
+      type: "success",
+      isLoading: false,
+      autoClose: 1000,
+    });
   } catch (e: any) {
     yield put(favoriteArticleFaild(action.payload));
+    yield toast(`${action.payload.type} failed`, {
+      type: "error",
+      isLoading: false,
+      autoClose: 1000,
+    });
+  } finally {
+    action.payload.setSlugLoading("");
+    action.payload.setLoadingFavorite(false);
   }
 }
+
 function* articleSaga() {
   yield takeLatest(fetchArticlesYouFeed.type, handleFetchArticlsFeed);
   yield takeLatest(fetchArticlesGlobal.type, handleFetchArticlsGlobal);
-  yield takeLatest(fetchArticlesFavorite.type, handleFetchArticlsFavorite);
-  yield takeLatest(deleteComment.type, handleDeleteComment);
-  yield takeEvery(fetchComments.type, handleFetchComments);
-  yield takeEvery(addCommentArticle.type, handleAddComment);
-  yield takeEvery(addCommentToArticleSuccess.type, handleAddCommentSuccess);
-  yield takeEvery(fetchTags.type, handleFetchTags);
   yield takeEvery(createArticle.type, handleCreateArticle);
   yield takeEvery(editArticle.type, handleEditArticle);
   yield takeEvery(favoriteArticle.type, handleFavoriteArticle);
   yield takeEvery(deleteArticle.type, handleDeleteArticle);
+  yield takeLatest(fetchArticlesByAuthor.type, handleFetchArticlsByAuthor);
+  yield takeLatest(fetchArticlesFavoriteByAuthor.type, handleFetchArticlsFavoriteByAuthor);
+  yield takeLatest(fetchDetailArticle.type, handleFetchDetailArticle);
 }
 export default articleSaga;
