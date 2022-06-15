@@ -7,6 +7,7 @@ import Moment from "react-moment";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../app/hooks";
 import ModalFormEdit from "./ModalFormEdit";
+import { addTag } from "features/tag/tagSlice";
 export interface InforArticleState {
   information: IArticle;
   detail?: boolean;
@@ -43,6 +44,11 @@ export default function Article({ information, detail }: InforArticleState) {
   const handleDeleteArticle = () => {
     dispatch(deleteArticle({ slug: information.slug, setDeleteLoading }));
   };
+  const handleNavigateFetchArticleByTag = (e: any, tag: string) => {
+    e.stopPropagation();
+    navigate("/");
+    dispatch(addTag(tag));
+  };
   return (
     <>
       {deleteLoading === "failed" && (
@@ -68,7 +74,7 @@ export default function Article({ information, detail }: InforArticleState) {
               <div className="article-bottom">
                 <div className="tags-content">
                   {information.tagList.map((item, index) => (
-                    <span key={index} className="tags-item">
+                    <span key={index} className="tags-item" onClick={(e) => handleNavigateFetchArticleByTag(e, item)}>
                       {item}
                     </span>
                   ))}

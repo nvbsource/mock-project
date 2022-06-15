@@ -2,7 +2,7 @@ import { PayloadAction } from "@reduxjs/toolkit";
 import { AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import { push } from "redux-first-history";
-import { call, put, takeEvery, takeLatest, all } from "redux-saga/effects";
+import { all, call, put, takeEvery, takeLatest } from "redux-saga/effects";
 import apiArticle from "services/articles.service";
 import { ArticleCreate, IArticle } from "../../models/article.model";
 import {
@@ -19,6 +19,9 @@ import {
   Favotite,
   fetchArticlesByAuthor,
   fetchArticlesByAuthorSuccess,
+  fetchArticlesByTag,
+  fetchArticlesByTagFailed,
+  fetchArticlesByTagSuccess,
   fetchArticlesFavoriteByAuthor,
   fetchArticlesFavoriteByAuthorFailed,
   fetchArticlesFavoriteByAuthorSuccess,
@@ -31,8 +34,7 @@ import {
   fetchDetailArticle,
   fetchDetailArticleFailed,
   fetchDetailArticleSuccess,
-  setTotalArticleGlobal,
-  setTotalArticleYouFeed,
+  setTotalArticle,
 } from "./articleSlice";
 function* handleFetchArticlsGlobal(action: PayloadAction<{ limit: number; offset: number }>) {
   try {
@@ -42,9 +44,22 @@ function* handleFetchArticlsGlobal(action: PayloadAction<{ limit: number; offset
     ]);
     const [list, total] = response;
     yield put(fetchArticlesGlobalSuccess(list.data.articles));
-    yield put(setTotalArticleGlobal(total.data.articlesCount));
+    yield put(setTotalArticle(total.data.articlesCount));
   } catch (e) {
     yield put(fetchArticlesGlobalFailed("Get data failed"));
+  }
+}
+function* handleFetchArticlsByTag(action: PayloadAction<{ limit: number; offset: number; tag: string }>) {
+  try {
+    const response: AxiosResponse[] = yield all([
+      call(apiArticle.getListArticlesByTag, action.payload),
+      call(apiArticle.getTotalArticlesByTag, { tag: action.payload.tag }),
+    ]);
+    const [list, total] = response;
+    yield put(fetchArticlesByTagSuccess(list.data.articles));
+    yield put(setTotalArticle(total.data.articlesCount));
+  } catch (e) {
+    yield put(fetchArticlesByTagFailed("Get data failed"));
   }
 }
 function* handleFetchArticlsFeed(action: PayloadAction<{ limit: number; offset: number }>) {
@@ -55,7 +70,7 @@ function* handleFetchArticlsFeed(action: PayloadAction<{ limit: number; offset: 
     ]);
     const [list, total] = response;
     yield put(fetchArticlesYouFeedSuccess(list.data.articles));
-    yield put(setTotalArticleYouFeed(total.data.articlesCount));
+    yield put(setTotalArticle(total.data.articlesCount));
   } catch (e) {
     yield put(fetchArticlesYouFeedFailed("Get data failed"));
   }
@@ -195,5 +210,6 @@ function* articleSaga() {
   yield takeLatest(fetchArticlesByAuthor.type, handleFetchArticlsByAuthor);
   yield takeLatest(fetchArticlesFavoriteByAuthor.type, handleFetchArticlsFavoriteByAuthor);
   yield takeLatest(fetchDetailArticle.type, handleFetchDetailArticle);
+  yield takeLatest(fetchArticlesByTag.type, handleFetchArticlsByTag);
 }
 export default articleSaga;

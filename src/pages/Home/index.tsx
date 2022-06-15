@@ -1,8 +1,10 @@
 import { useAppSelector } from "app/hooks";
 import {
+  fetchArticlesByTag,
   fetchArticlesGlobal,
   fetchArticlesYouFeed,
   selectArticles,
+  selectFetchArticleByTagLoading,
   selectFetchArticleGlobalLoading,
   selectFetchArticleYouFeedLoading,
   selectLimit,
@@ -22,6 +24,16 @@ export default function Home() {
   const localValue = localStorage.getItem("user_information");
   const information = localValue ? JSON.parse(localValue) : {};
   const [showModal, setShowModal] = useState(false);
+  let [searchParams, setSearchParams] = useSearchParams();
+  const currentPage = searchParams.get("page") || "1";
+  const articleList = useAppSelector(selectArticles);
+  const tagsList = useAppSelector(selectTagsList);
+  const loadingFeed = useAppSelector(selectFetchArticleYouFeedLoading);
+  const loadingGlobal = useAppSelector(selectFetchArticleGlobalLoading);
+  const loadingByTag = useAppSelector(selectFetchArticleByTagLoading);
+  const limit = useSelector(selectLimit);
+  const offset = Number(currentPage) * limit - limit;
+  const searchTag = useSelector(selectTagsSearchList);
   const [active, setActive] = useState({
     one: {
       name: "You feed",
@@ -32,31 +44,63 @@ export default function Home() {
       active: information.username ? false : true,
     },
   });
-  let [searchParams, setSearchParams] = useSearchParams();
-  const currentPage = searchParams.get("page") || "1";
-  const articleList = useAppSelector(selectArticles);
-  const tagsList = useAppSelector(selectTagsList);
-  const searchTags = useSelector(selectTagsSearchList);
-  const loadingFeed = useAppSelector(selectFetchArticleYouFeedLoading);
-  const loadingGlobal = useAppSelector(selectFetchArticleGlobalLoading);
-  const limit = useSelector(selectLimit);
-  const offset = Number(currentPage) * limit - limit;
+  useEffect(() => {
+    if (active.one.active && !searchTag) {
+      dispatch(fetchArticlesYouFeed({ limit, offset }));
+    } else if (active.two.active && !searchTag) {
+      dispatch(fetchArticlesGlobal({ limit, offset }));
+    }
+  }, [dispatch, active, currentPage, limit, offset, searchTag]);
   useEffect(() => {
     dispatch(fetchTags());
   }, [dispatch]);
-  const handleRemoveTag = (tag: string) => {
-    dispatch(removeTag(tag));
-  };
+  useEffect(() => {
+    if (searchTag) {
+      setActive((prevState) => ({
+        ...prevState,
+        one: { ...prevState.one, active: false },
+        two: { ...prevState.two, active: false },
+      }));
+      dispatch(fetchArticlesByTag({ limit, offset, tag: searchTag }));
+    }
+  }, [dispatch, searchTag, limit, offset]);
   const handleAddTag = (tag: string) => {
     dispatch(addTag(tag));
+    setSearchParams({});
+  };
+  const handleYouFeed = () => {
+    setSearchParams({});
+    dispatch(removeTag());
+    setActive((prevState) => ({
+      ...prevState,
+      one: {
+        name: "You feed",
+        active: true,
+      },
+      two: {
+        name: "Global feed",
+        active: false,
+      },
+    }));
+  };
+  const handleGlobal = () => {
+    setSearchParams({});
+    dispatch(removeTag());
+    setActive((prevState) => ({
+      ...prevState,
+      one: {
+        name: "You feed",
+        active: false,
+      },
+      two: {
+        name: "Global feed",
+        active: true,
+      },
+    }));
   };
   const renderArticles = () => {
-    const list =
-      searchTags.length > 0
-        ? articleList.filter((item) => item.tagList.some((tag) => searchTags.find((search) => search === tag)))
-        : articleList;
-    if (list.length > 0) {
-      return list?.map((item, index) => <Article key={index} information={item} />);
+    if (articleList.length > 0) {
+      return articleList.map((item, index) => <Article key={index} information={item} />);
     } else {
       return <div className="article-notfound">There are no article</div>;
     }
@@ -65,47 +109,18 @@ export default function Home() {
     <Fragment>
       <ul className="profile-menu home-menu">
         {information.username && (
-          <li
-            className={`${active["one"].active ? "active" : ""}`}
-            onClick={() => {
-              setSearchParams({});
-              dispatch(fetchArticlesYouFeed({ limit, offset: 0 }));
-              setActive((prevState) => ({
-                ...prevState,
-                one: {
-                  name: "You feed",
-                  active: true,
-                },
-                two: {
-                  name: "Global feed",
-                  active: false,
-                },
-              }));
-            }}
-          >
+          <li className={`${active["one"].active ? "active" : ""}`} onClick={handleYouFeed}>
             <i className="fa-solid fa-rss"></i> You feed
           </li>
         )}
-        <li
-          className={`${active["two"].active ? "active" : ""}`}
-          onClick={() => {
-            setSearchParams({});
-            dispatch(fetchArticlesGlobal({ limit, offset: 0 }));
-            setActive((prevState) => ({
-              ...prevState,
-              one: {
-                name: "You feed",
-                active: false,
-              },
-              two: {
-                name: "Global feed",
-                active: true,
-              },
-            }));
-          }}
-        >
+        <li className={`${active["two"].active ? "active" : ""}`} onClick={handleGlobal}>
           <i className="fa-solid fa-rss"></i> Global Feed
         </li>
+        {searchTag && (
+          <li className="active">
+            <i className="fa-solid fa-rss"></i> {searchTag}
+          </li>
+        )}
       </ul>
       <main className="feed">
         <div className="feed-body">
@@ -116,17 +131,9 @@ export default function Home() {
               </div>
             </div>
           )}
-          <div className="tags-content  mb-2">
-            {searchTags.map((item) => (
-              <div className="tags-item tags-search" onClick={() => handleRemoveTag(item)}>
-                <span>{item}</span>
-                <i className="fa-solid fa-trash-can tags-close"></i>
-              </div>
-            ))}
-          </div>
 
           <div className="articles">
-            {loadingGlobal || loadingFeed ? (
+            {loadingGlobal || loadingFeed || loadingByTag ? (
               <Fragment>
                 <ArticleLoading />
                 <ArticleLoading />
@@ -137,7 +144,7 @@ export default function Home() {
             )}
           </div>
           <div className="d-flex justify-content-center mt-3">
-            <PaginationList limit={limit} offset={offset} pageActive={active} />
+            <PaginationList limit={limit} />
           </div>
         </div>
         <div className="tags">

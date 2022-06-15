@@ -8,14 +8,14 @@ export interface ArticleState {
   loadingFetchArticleYouFeed: boolean;
   loadingFetchArticleFavoriteByAuthor: boolean;
   loadingFetchArticleByAuthor: boolean;
+  loadingFetchArticleByTag: boolean;
   loadingCreateArticle: boolean;
   loadingDetailArticle: boolean;
   articleDetail: IArticle;
   articles: IArticle[];
   tags: string[];
   limit: number;
-  totalArticleGlobal: number;
-  totalArticleYouFeed: number;
+  totalArticle: number;
 }
 export interface Favotite {
   slug: string;
@@ -31,6 +31,7 @@ const initialState: ArticleState = {
   loadingFetchArticleByAuthor: false,
   loadingFetchArticleFavoriteByAuthor: false,
   loadingFetchArticleGlobal: false,
+  loadingFetchArticleByTag: false,
   loadingFetchArticleYouFeed: false,
   loadingCreateArticle: false,
   loadingDetailArticle: false,
@@ -52,8 +53,7 @@ const initialState: ArticleState = {
   articles: [],
   tags: [],
   limit: 3,
-  totalArticleGlobal: 0,
-  totalArticleYouFeed: 0,
+  totalArticle: 0,
 };
 
 const articleSlice = createSlice({
@@ -71,11 +71,19 @@ const articleSlice = createSlice({
       state.loadingFetchArticleGlobal = false;
     },
 
-    setTotalArticleGlobal: (state, action: PayloadAction<number>) => {
-      state.totalArticleGlobal = action.payload;
+    setTotalArticle: (state, action: PayloadAction<number>) => {
+      state.totalArticle = action.payload;
     },
-    setTotalArticleYouFeed: (state, action: PayloadAction<number>) => {
-      state.totalArticleYouFeed = action.payload;
+
+    fetchArticlesByTag: (state, action: PayloadAction<{ limit: number; offset: number; tag: string }>) => {
+      state.loadingFetchArticleByTag = true;
+    },
+    fetchArticlesByTagSuccess: (state, action: PayloadAction<IArticle[]>) => {
+      state.loadingFetchArticleByTag = false;
+      state.articles = action.payload;
+    },
+    fetchArticlesByTagFailed: (state, action: PayloadAction<string>) => {
+      state.loadingFetchArticleByTag = false;
     },
 
     fetchArticlesByAuthor: (state, action: PayloadAction<string>) => {
@@ -212,16 +220,18 @@ export const {
   fetchDetailArticle,
   fetchDetailArticleSuccess,
   fetchDetailArticleFailed,
-  setTotalArticleGlobal,
-  setTotalArticleYouFeed,
+  fetchArticlesByTag,
+  fetchArticlesByTagFailed,
+  fetchArticlesByTagSuccess,
+  setTotalArticle,
 } = articleSlice.actions;
 export const selectArticles = (state: RootState) => state.article.articles;
-export const selectTotalArticleGlobal = (state: RootState) => state.article.totalArticleGlobal;
-export const selectTotalArticleYouFeed = (state: RootState) => state.article.totalArticleYouFeed;
+export const selectTotalArticle = (state: RootState) => state.article.totalArticle;
 export const selectTags = (state: RootState) => state.article.tags;
 export const selectLimit = (state: RootState) => state.article.limit;
 export const selectFetchArticleGlobalLoading = (state: RootState) => state.article.loadingFetchArticleGlobal;
 export const selectFetchArticleYouFeedLoading = (state: RootState) => state.article.loadingFetchArticleYouFeed;
+export const selectFetchArticleByTagLoading = (state: RootState) => state.article.loadingFetchArticleByTag;
 export const selectCreateLoading = (state: RootState) => state.article.loadingCreateArticle;
 export const selectLoadingFetchArticleByAuthor = (state: RootState) => state.article.loadingFetchArticleByAuthor;
 export const selectLoadingFetchArticleFavoriteByAuthor = (state: RootState) =>

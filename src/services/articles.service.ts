@@ -29,6 +29,12 @@ const articles = {
   getTotalArticlesFeed: () => {
     return httpRequest.get(`/articles/feed`);
   },
+  getListArticlesByTag: ({ limit = 10, offset = 0, tag = "" }) => {
+    return httpRequest.get(`/articles?limit=${limit}&offset=${offset}&tag=${tag}`);
+  },
+  getTotalArticlesByTag: ({ tag = "" }) => {
+    return httpRequest.get(`/articles?tag=${tag}`);
+  },
   getArticle: (slug: string) => {
     return httpRequest.get(`/articles/${slug}`);
   },

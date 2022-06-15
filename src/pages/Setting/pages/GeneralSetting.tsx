@@ -10,6 +10,7 @@ interface MyFormValues {
   username: string;
   image: string;
   bio: string;
+  password: string;
 }
 const LoginSchema = Yup.object({
   username: Yup.string().required("Username can not blank!"),
@@ -23,6 +24,7 @@ export default function LoginForm() {
     username: information.username,
     image: information.image || "",
     bio: information.bio || "",
+    password: "",
   };
   return (
     <Formik
@@ -60,6 +62,15 @@ export default function LoginForm() {
                   component={InputField}
                   type="text"
                   placeholder="About"
+                  icon={<i className="fa-solid fa-address-card"></i>}
+                />
+              </Col>
+              <Col xs={12}>
+                <FastField
+                  name="password"
+                  component={InputField}
+                  type="text"
+                  placeholder="New Password"
                   icon={<i className="fa-solid fa-address-card"></i>}
                 />
               </Col>

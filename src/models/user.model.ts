@@ -17,4 +17,5 @@ export interface UpdateInformationUser {
   username: string;
   bio: string;
   image: string;
+  password: string;
 }

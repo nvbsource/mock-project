@@ -3,12 +3,12 @@ import { RootState } from "app/store";
 export interface TagState {
   loading: boolean;
   tags: string[];
-  tagsSearch: string[];
+  tagsSearch: string;
 }
 const initialState: TagState = {
   loading: false,
   tags: [],
-  tagsSearch: [],
+  tagsSearch: "",
 };
 const tagSlice = createSlice({
   name: "tag",
@@ -25,13 +25,10 @@ const tagSlice = createSlice({
       state.loading = false;
     },
     addTag: (state, action: PayloadAction<string>) => {
-      state.tagsSearch = [action.payload, ...state.tagsSearch];
+      state.tagsSearch = action.payload;
     },
-    removeTag: (state, action: PayloadAction<string>) => {
-      const index = state.tagsSearch.findIndex((item) => item === action.payload);
-      if (index !== -1) {
-        state.tagsSearch.splice(index, 1);
-      }
+    removeTag: (state) => {
+      state.tagsSearch = "";
     },
   },
 });
