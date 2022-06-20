@@ -1,4 +1,4 @@
-import { ForgotPassword, Login, Register } from "pages/auth";
+import { Login, Register } from "pages/auth";
 import FavoriteArticles from "pages/Favorite";
 import Home from "pages/Home";
 import Profile from "pages/Profile";
@@ -31,14 +31,6 @@ function App() {
         element={
           <DefaultOnlyHeader>
             <Register />
-          </DefaultOnlyHeader>
-        }
-      />
-      <Route
-        path="/forgot-password"
-        element={
-          <DefaultOnlyHeader>
-            <ForgotPassword />
           </DefaultOnlyHeader>
         }
       />

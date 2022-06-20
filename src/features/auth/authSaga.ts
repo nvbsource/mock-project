@@ -13,6 +13,11 @@ function* handleLogin(action: PayloadAction<UserLogin>) {
     const response: AxiosResponse = yield call(apiUsers.login, action.payload);
     localStorage.setItem("user_information", JSON.stringify(response.data.user));
     configAPI.defaults.headers.common["Authorization"] = `Bearer ${response.data.user.token}`;
+    if (action.payload.remember) {
+      localStorage.setItem("remember", action.payload.remember);
+    } else {
+      localStorage.removeItem("remember");
+    }
     yield put(loginSuccess());
     yield toast.update(toastId, {
       render: "Log in successfull",
@@ -52,7 +57,13 @@ function* handleRegister(action: PayloadAction<UserRegister>) {
       isLoading: false,
       autoClose: 1000,
     });
-    yield put(login({ email: action.payload.email, password: action.payload.password }));
+    yield put(
+      login({
+        email: action.payload.email,
+        password: action.payload.password,
+        remember: action.payload.email,
+      })
+    );
   } catch (e: any) {
     const errors = Object.keys(e.response.data.errors);
     let content = "";

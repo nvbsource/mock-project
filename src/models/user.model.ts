@@ -1,6 +1,7 @@
 export interface UserLogin {
   email: string;
   password: string;
+  remember?: string | null;
 }
 export interface UserRegister {
   username: string;

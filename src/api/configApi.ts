@@ -9,6 +9,7 @@ const instance = axios.create({
   baseURL: "https://api.realworld.io/api",
 });
 instance.defaults.headers.common["Authorization"] = `Bearer ${getAccessToken()}`;
+
 instance.interceptors.response.use(
   function (response) {
     return response;

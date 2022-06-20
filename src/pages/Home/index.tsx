@@ -3,6 +3,8 @@ import {
   fetchArticlesByTag,
   fetchArticlesGlobal,
   fetchArticlesYouFeed,
+  fetchTotalArticlesGlobal,
+  fetchTotalArticlesYouFeed,
   selectArticles,
   selectFetchArticleByTagLoading,
   selectFetchArticleGlobalLoading,
@@ -37,37 +39,43 @@ export default function Home() {
   const [active, setActive] = useState({
     one: {
       name: "You feed",
-      active: information.username ? true : false,
+      active: information.username && !searchTag ? false : false,
     },
     two: {
       name: "Global feed",
-      active: information.username ? false : true,
+      active: information.username && !searchTag ? true : true,
     },
   });
+
   useEffect(() => {
-    if (active.one.active && !searchTag) {
+    if (searchTag) {
+      dispatch(fetchArticlesByTag({ limit, offset, tag: searchTag }));
+    } else if (active.one.active) {
+      dispatch(fetchTotalArticlesYouFeed());
+    } else if (active.two.active) {
+      dispatch(fetchTotalArticlesGlobal());
+    }
+  }, [dispatch, active, searchTag]);
+
+  useEffect(() => {
+    if (searchTag) {
+      dispatch(fetchArticlesByTag({ limit, offset, tag: searchTag }));
+    } else if (active.one.active) {
       dispatch(fetchArticlesYouFeed({ limit, offset }));
-    } else if (active.two.active && !searchTag) {
+    } else if (active.two.active) {
       dispatch(fetchArticlesGlobal({ limit, offset }));
     }
-  }, [dispatch, active, currentPage, limit, offset, searchTag]);
+  }, [dispatch, active, offset]);
+
   useEffect(() => {
     dispatch(fetchTags());
   }, [dispatch]);
-  useEffect(() => {
-    if (searchTag) {
-      setActive((prevState) => ({
-        ...prevState,
-        one: { ...prevState.one, active: false },
-        two: { ...prevState.two, active: false },
-      }));
-      dispatch(fetchArticlesByTag({ limit, offset, tag: searchTag }));
-    }
-  }, [dispatch, searchTag, limit, offset]);
+
   const handleAddTag = (tag: string) => {
     dispatch(addTag(tag));
     setSearchParams({});
   };
+
   const handleYouFeed = () => {
     setSearchParams({});
     dispatch(removeTag());
@@ -109,11 +117,11 @@ export default function Home() {
     <Fragment>
       <ul className="profile-menu home-menu">
         {information.username && (
-          <li className={`${active["one"].active ? "active" : ""}`} onClick={handleYouFeed}>
+          <li className={`${active["one"].active && !searchTag ? "active" : ""}`} onClick={handleYouFeed}>
             <i className="fa-solid fa-rss"></i> You feed
           </li>
         )}
-        <li className={`${active["two"].active ? "active" : ""}`} onClick={handleGlobal}>
+        <li className={`${active["two"].active && !searchTag ? "active" : ""}`} onClick={handleGlobal}>
           <i className="fa-solid fa-rss"></i> Global Feed
         </li>
         {searchTag && (

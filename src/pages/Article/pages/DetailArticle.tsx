@@ -26,6 +26,7 @@ export default function DetailArticle() {
     dispatch(fetchDetailArticle(slug as string));
     dispatch(fetchComments(slug as string));
   }, [dispatch, slug]);
+
   useEffect(() => {
     if (!loadingAddComments && !loadingFetchComments) {
       setComment("");

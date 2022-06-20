@@ -1,5 +1,6 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { AxiosResponse } from "axios";
+import { fetchTags } from "features/tag/tagSlice";
 import { toast } from "react-toastify";
 import { push } from "redux-first-history";
 import { all, call, put, takeEvery, takeLatest } from "redux-saga/effects";
@@ -34,17 +35,14 @@ import {
   fetchDetailArticle,
   fetchDetailArticleFailed,
   fetchDetailArticleSuccess,
+  fetchTotalArticlesGlobal,
+  fetchTotalArticlesYouFeed,
   setTotalArticle,
 } from "./articleSlice";
-function* handleFetchArticlsGlobal(action: PayloadAction<{ limit: number; offset: number }>) {
+function* handleFetchArticlsGlobalFilter(action: PayloadAction<{ limit: number; offset: number }>) {
   try {
-    const response: AxiosResponse[] = yield all([
-      call(apiArticle.getListArticles, action.payload),
-      call(apiArticle.getTotalArticles),
-    ]);
-    const [list, total] = response;
-    yield put(fetchArticlesGlobalSuccess(list.data.articles));
-    yield put(setTotalArticle(total.data.articlesCount));
+    const response: AxiosResponse = yield call(apiArticle.getListArticles, action.payload);
+    yield put(fetchArticlesGlobalSuccess(response.data.articles));
   } catch (e) {
     yield put(fetchArticlesGlobalFailed("Get data failed"));
   }
@@ -62,19 +60,31 @@ function* handleFetchArticlsByTag(action: PayloadAction<{ limit: number; offset:
     yield put(fetchArticlesByTagFailed("Get data failed"));
   }
 }
-function* handleFetchArticlsFeed(action: PayloadAction<{ limit: number; offset: number }>) {
+function* handleFetchArticlsFeedFilter(action: PayloadAction<{ limit: number; offset: number }>) {
   try {
-    const response: AxiosResponse[] = yield all([
-      call(apiArticle.getListArticlesFeed, action.payload),
-      call(apiArticle.getTotalArticlesFeed),
-    ]);
-    const [list, total] = response;
-    yield put(fetchArticlesYouFeedSuccess(list.data.articles));
-    yield put(setTotalArticle(total.data.articlesCount));
+    const response: AxiosResponse = yield call(apiArticle.getListArticlesFeed, action.payload);
+    yield put(fetchArticlesYouFeedSuccess(response.data.articles));
   } catch (e) {
     yield put(fetchArticlesYouFeedFailed("Get data failed"));
   }
 }
+function* handleFetchTotalArticlsFeed() {
+  try {
+    const response: AxiosResponse = yield call(apiArticle.getTotalArticlesFeed);
+    yield put(setTotalArticle(response.data.articlesCount));
+  } catch (e) {
+    yield put(fetchArticlesYouFeedFailed("Get data failed"));
+  }
+}
+function* handleFetchTotalArticlsGlobal() {
+  try {
+    const response: AxiosResponse = yield call(apiArticle.getTotalArticles);
+    yield put(setTotalArticle(response.data.articlesCount));
+  } catch (e) {
+    yield put(fetchArticlesGlobalFailed("Get data failed"));
+  }
+}
+
 function* handleFetchDetailArticle(action: PayloadAction<string>) {
   try {
     const response: AxiosResponse = yield call(apiArticle.getArticle, action.payload);
@@ -104,11 +114,21 @@ function* handleFetchArticlsFavoriteByAuthor(action: PayloadAction<string>) {
 }
 function* handleDeleteArticle(action: PayloadAction<DeleteArticle>) {
   try {
-    action.payload.setDeleteLoading("pending");
+    yield action.payload.setDeleteLoading("pending");
     yield call(apiArticle.deleteArticle, action.payload.slug);
-    action.payload.setDeleteLoading("success");
+    yield put(fetchTags());
+    yield action.payload.setDeleteLoading("success");
+    yield toast("Delete article successfull", {
+      type: "success",
+      autoClose: 1000,
+    });
+    yield put(push("/"));
   } catch (e) {
     action.payload.setDeleteLoading("failed");
+    yield toast("Delete article failed", {
+      type: "error",
+      autoClose: 1000,
+    });
   }
 }
 function* handleCreateArticle(action: PayloadAction<ArticleCreate>) {
@@ -153,6 +173,7 @@ function* handleEditArticle(action: PayloadAction<IArticle>) {
       isLoading: false,
       autoClose: 1000,
     });
+    yield put(fetchTags());
     yield put(editArticleSuccess());
     yield put(fetchDetailArticleSuccess(response.data.article));
     yield put(push(`/article/${response.data.article.slug}`));
@@ -195,14 +216,16 @@ function* handleFavoriteArticle(action: PayloadAction<Favotite>) {
       autoClose: 1000,
     });
   } finally {
-    action.payload.setSlugLoading("");
-    action.payload.setLoadingFavorite(false);
+    yield action.payload.setSlugLoading("");
+    yield action.payload.setLoadingFavorite(false);
   }
 }
 
 function* articleSaga() {
-  yield takeLatest(fetchArticlesYouFeed.type, handleFetchArticlsFeed);
-  yield takeLatest(fetchArticlesGlobal.type, handleFetchArticlsGlobal);
+  yield takeLatest(fetchTotalArticlesGlobal.type, handleFetchTotalArticlsGlobal);
+  yield takeLatest(fetchTotalArticlesYouFeed.type, handleFetchTotalArticlsFeed);
+  yield takeLatest(fetchArticlesYouFeed.type, handleFetchArticlsFeedFilter);
+  yield takeLatest(fetchArticlesGlobal.type, handleFetchArticlsGlobalFilter);
   yield takeEvery(createArticle.type, handleCreateArticle);
   yield takeEvery(editArticle.type, handleEditArticle);
   yield takeEvery(favoriteArticle.type, handleFavoriteArticle);

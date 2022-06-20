@@ -39,7 +39,9 @@ export default function Article({ information, detail }: InforArticleState) {
     const type = information.favorited ? "unfavorite" : "favorite";
     setSlugLoading(information.slug);
     setLoadingFavorite(true);
-    dispatch(favoriteArticle({ slug: information.slug, type, setSlugLoading, setLoadingFavorite }));
+    dispatch(
+      favoriteArticle({ slug: information.slug, type, setSlugLoading, setLoadingFavorite, detail: detail as boolean })
+    );
   };
   const handleDeleteArticle = () => {
     dispatch(deleteArticle({ slug: information.slug, setDeleteLoading }));
@@ -97,7 +99,7 @@ export default function Article({ information, detail }: InforArticleState) {
             </button>
           </div>
 
-          {userInformation.username === information.author.username && (
+          {userInformation.username === information.author.username && detail && (
             <div className="article-action">
               <i className="fa-solid fa-pen-to-square article-edit" onClick={() => setShowModal(true)}></i>
               <i className="fa-solid fa-trash-can article-edit" onClick={handleDeleteArticle}></i>

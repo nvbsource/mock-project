@@ -21,7 +21,10 @@ export const store = configureStore({
     tags: tagReducer,
     router: routerReducer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(sagaMiddleware, routerMiddleware),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }).concat(sagaMiddleware, routerMiddleware),
 });
 sagaMiddleware.run(rootSaga);
 export const history = createReduxHistory(store);

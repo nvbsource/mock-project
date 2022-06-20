@@ -3,6 +3,7 @@ import { FastField, Form, Formik } from "formik";
 import InputField from "Layout/Form/InputField";
 import IconLoading from "Layout/Loading/IconLoading";
 import React from "react";
+import { useRef } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import * as Yup from "yup";
@@ -16,15 +17,23 @@ const LoginSchema = Yup.object({
   password: Yup.string().required("Password can not blank!"),
 });
 export default function LoginForm() {
-  const initialValues: MyFormValues = { email: "", password: "" };
+  const remember = localStorage.getItem("remember");
+  const initialValues: MyFormValues = { email: remember ? remember : "", password: "" };
   const dispatch = useAppDispatch();
   const logging = useSelector(selectLogging);
+  const checkboxRemember: any = useRef();
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={LoginSchema}
       onSubmit={(values) => {
-        dispatch(login({ email: values.email, password: values.password }));
+        dispatch(
+          login({
+            email: values.email,
+            password: values.password,
+            remember: checkboxRemember.current.checked ? values.email : null,
+          })
+        );
       }}
     >
       {({ handleSubmit }) => (
@@ -45,10 +54,15 @@ export default function LoginForm() {
           />
           <div className="form-footer">
             <div className="form-remember">
-              <input type="checkbox" className="form-checkbox" id="remember" />
+              <input
+                ref={checkboxRemember}
+                type="checkbox"
+                className="form-checkbox"
+                id="remember"
+                defaultChecked={Boolean(remember)}
+              />
               <label htmlFor="remember">Remember me</label>
             </div>
-            <Link to="/forgot-password">Forgot password</Link>
           </div>
           <button className="form-button" disabled={logging}>
             Sign in {logging && <IconLoading />}

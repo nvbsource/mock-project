@@ -22,6 +22,7 @@ export interface Favotite {
   type: "favorite" | "unfavorite";
   setSlugLoading: any;
   setLoadingFavorite: any;
+  detail: boolean;
 }
 export interface DeleteArticle {
   slug: string;
@@ -60,6 +61,12 @@ const articleSlice = createSlice({
   name: "article",
   initialState,
   reducers: {
+    fetchTotalArticlesGlobal: (state) => {},
+    fetchTotalArticlesYouFeed: (state) => {},
+    setTotalArticle: (state, action: PayloadAction<number>) => {
+      state.totalArticle = action.payload;
+    },
+
     fetchArticlesGlobal: (state, action: PayloadAction<{ limit: number; offset: number }>) => {
       state.loadingFetchArticleGlobal = true;
     },
@@ -69,10 +76,6 @@ const articleSlice = createSlice({
     },
     fetchArticlesGlobalFailed: (state, action: PayloadAction<string>) => {
       state.loadingFetchArticleGlobal = false;
-    },
-
-    setTotalArticle: (state, action: PayloadAction<number>) => {
-      state.totalArticle = action.payload;
     },
 
     fetchArticlesByTag: (state, action: PayloadAction<{ limit: number; offset: number; tag: string }>) => {
@@ -134,41 +137,59 @@ const articleSlice = createSlice({
 
     favoriteArticle: (state, action: PayloadAction<Favotite>) => {
       const articleExist = state.articles.find((item) => item.slug === action.payload.slug);
-      if (articleExist) {
-        switch (action.payload.type) {
-          case "favorite":
+      switch (action.payload.type) {
+        case "favorite":
+          if (action.payload.detail) {
+            state.articleDetail.favoritesCount = state.articleDetail.favoritesCount + 1;
+          } else if (articleExist) {
             articleExist.favoritesCount = articleExist.favoritesCount + 1;
-            break;
-          case "unfavorite":
+          }
+          break;
+        case "unfavorite":
+          if (action.payload.detail) {
+            state.articleDetail.favoritesCount = state.articleDetail.favoritesCount - 1;
+          } else if (articleExist) {
             articleExist.favoritesCount = articleExist.favoritesCount - 1;
-            break;
-        }
+          }
+          break;
       }
     },
     favoriteArticleSuccess: (state, action: PayloadAction<Favotite>) => {
       const articleExist = state.articles.find((item) => item.slug === action.payload.slug);
-      if (articleExist) {
-        switch (action.payload.type) {
-          case "favorite":
+      switch (action.payload.type) {
+        case "favorite":
+          if (action.payload.detail) {
+            state.articleDetail.favorited = true;
+          } else if (articleExist) {
             articleExist.favorited = true;
-            break;
-          case "unfavorite":
+          }
+          break;
+        case "unfavorite":
+          if (action.payload.detail) {
+            state.articleDetail.favorited = false;
+          } else if (articleExist) {
             articleExist.favorited = false;
-            break;
-        }
+          }
+          break;
       }
     },
     favoriteArticleFaild: (state, action: PayloadAction<Favotite>) => {
       const articleExist = state.articles.find((item) => item.slug === action.payload.slug);
-      if (articleExist) {
-        switch (action.payload.type) {
-          case "favorite":
+      switch (action.payload.type) {
+        case "favorite":
+          if (action.payload.detail) {
+            state.articleDetail.favoritesCount = state.articleDetail.favoritesCount - 1;
+          } else if (articleExist) {
             articleExist.favoritesCount = articleExist.favoritesCount - 1;
-            break;
-          case "unfavorite":
+          }
+          break;
+        case "unfavorite":
+          if (action.payload.detail) {
+            state.articleDetail.favoritesCount = state.articleDetail.favoritesCount + 1;
+          } else if (articleExist) {
             articleExist.favoritesCount = articleExist.favoritesCount + 1;
-            break;
-        }
+          }
+          break;
       }
     },
     createArticle: (state, action: PayloadAction<ArticleCreate>) => {
@@ -224,6 +245,8 @@ export const {
   fetchArticlesByTagFailed,
   fetchArticlesByTagSuccess,
   setTotalArticle,
+  fetchTotalArticlesGlobal,
+  fetchTotalArticlesYouFeed,
 } = articleSlice.actions;
 export const selectArticles = (state: RootState) => state.article.articles;
 export const selectTotalArticle = (state: RootState) => state.article.totalArticle;

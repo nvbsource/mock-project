@@ -39,17 +39,6 @@ export default function Information() {
             </button>
           )}
         </div>
-        <div className="profile-couter">
-          <span>
-            <b>0</b> Bài viết
-          </span>
-          <span>
-            <b>0</b> Người theo giõi
-          </span>
-          <span>
-            Đang theo dõi <b>0</b> người dùng
-          </span>
-        </div>
       </div>
     </div>
   );
